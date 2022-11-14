@@ -6,6 +6,9 @@ import java.util.*;
 
 @Entity
 @Table(name = "rolt_property")
+@NamedQueries({
+        @NamedQuery(name = "Property.findByOwner", query = "SELECT p from Property p WHERE p.owner = :owner")
+})
 public class Property implements Serializable {
     @Id
     @Column(name = "id")
@@ -177,13 +180,20 @@ public class Property implements Serializable {
             contracts = new ArrayList<>();
         }
 
-        final Optional<Contract> existing = contracts.stream().filter(c -> c.getId()
-                .equals(contract.getId())).findAny();
+        final Optional<Contract> existing = contracts.stream().filter(c -> c
+                .equals(contract)).findAny();
 
         if (existing.isEmpty()) {
             contract.setLandlord(owner);
             contracts.add(contract);
         }
+    }
+
+    public void removeContract(Contract contract) {
+        Objects.requireNonNull(contract);
+        if (contracts == null) return;
+
+        contracts.remove(contract);
     }
 
     @Override

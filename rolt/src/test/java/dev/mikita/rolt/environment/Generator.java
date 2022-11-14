@@ -2,7 +2,7 @@ package dev.mikita.rolt.environment;
 
 import dev.mikita.rolt.entity.*;
 
-import java.time.LocalDateTime;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Random;
 
@@ -39,11 +39,27 @@ public class Generator {
         return city;
     }
 
-//    public static Contract generateContract() {
-//        final Contract contract = new Contract();
-//        contract.setStartDate(new Date());
-//        contract.setEndDate(Date.from(new LocalDateTime()));
-//    }
+    public static Contract generateContract() {
+        final Contract contract = new Contract();
+
+        Date startDate = new Date();
+        Calendar endDate = Calendar.getInstance();
+        endDate.setTime(startDate);
+        endDate.add(Calendar.DATE, randomInt(2, 90));
+
+        contract.setStartDate(new Date());
+        contract.setEndDate(endDate.getTime());
+
+        return contract;
+    }
+
+    public static Review generateReview() {
+        final Review review = new Review();
+        review.setDescription("randomDescription" + randomInt());
+        review.setRating(randomInt(1, 5));
+
+        return review;
+    }
 
     public static Property generateProperty() {
         final Property property = new Property();

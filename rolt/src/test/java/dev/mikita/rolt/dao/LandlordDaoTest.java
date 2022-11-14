@@ -34,11 +34,12 @@ public class LandlordDaoTest {
     public void findAllReturnsOnlyActiveLandlords() {
         final List<Landlord> landlords = IntStream.range(0, 10).mapToObj(i -> Generator.generateLandlord())
                 .collect(Collectors.toList());
-        landlords.forEach(em::persist);
 
         Landlord bannedLandlord = Generator.generateLandlord();
         bannedLandlord.getDetails().setStatus(ConsumerStatus.BANNED);
-        em.persist(bannedLandlord);
+        landlords.add(bannedLandlord);
+
+        landlords.forEach(em::persist);
 
         final List<Landlord> result = landlordDao.findAll();
         assertEquals(landlords.stream().filter(t -> t.getDetails().getStatus() == ConsumerStatus.ACTIVE).count(), result.size());

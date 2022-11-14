@@ -14,9 +14,6 @@ public class Tenant extends User {
     @Embedded
     private ConsumerDetails details;
 
-    @OneToMany(mappedBy = "reviewed", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Review> reviews;
-
     @ManyToMany
     private List<Property> favorites;
 
@@ -36,15 +33,6 @@ public class Tenant extends User {
     public void setDetails(ConsumerDetails details) {
         Objects.requireNonNull(details);
         this.details = details;
-    }
-
-    public List<Review> getReviews() {
-        return reviews;
-    }
-
-    public void setReviews(List<Review> reviews) {
-        Objects.requireNonNull(reviews);
-        this.reviews = reviews;
     }
 
     public List<Property> getFavorites() {

@@ -1,17 +1,11 @@
 package dev.mikita.rolt.service;
 
 import dev.mikita.rolt.dao.ContractDao;
-import dev.mikita.rolt.dao.ReviewDao;
-import dev.mikita.rolt.entity.Contract;
-import dev.mikita.rolt.entity.PublicationStatus;
-import dev.mikita.rolt.entity.Review;
+import dev.mikita.rolt.entity.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 public class ContractService {
@@ -25,6 +19,16 @@ public class ContractService {
     @Transactional(readOnly = true)
     public List<Contract> findAll() {
         return dao.findAll();
+    }
+
+    @Transactional(readOnly = true)
+    public List<Contract> findByProperty(Property property) {
+        return dao.findByProperty(property);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Contract> findByUser(User user) {
+        return dao.findByUser(user);
     }
 
     @Transactional(readOnly = true)

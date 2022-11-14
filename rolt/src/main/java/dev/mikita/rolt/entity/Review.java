@@ -9,6 +9,10 @@ import java.util.Objects;
         uniqueConstraints = {
                 @UniqueConstraint(name="unique_author_reviewed_contract", columnNames = {"author_id", "reviewed_id", "contract_id"})
 })
+@NamedQueries({
+        @NamedQuery(name = "Contract.findByAuthor", query = "SELECT r from Review r WHERE r.author = :user"),
+        @NamedQuery(name = "Contract.findByReviewed", query = "SELECT r from Review r WHERE r.reviewed = :user")
+})
 public class Review {
     @Id
     @Column(name = "id")

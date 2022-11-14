@@ -1,8 +1,6 @@
 package dev.mikita.rolt.service;
 
-import dev.mikita.rolt.dao.PropertyDao;
 import dev.mikita.rolt.dao.ReviewDao;
-import dev.mikita.rolt.entity.Property;
 import dev.mikita.rolt.entity.PublicationStatus;
 import dev.mikita.rolt.entity.Review;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +37,7 @@ public class ReviewService {
 
     @Transactional
     public void update(Review review) {
+        Objects.requireNonNull(review);
         review.setUpdatedOn(new Date());
         dao.update(review);
     }
