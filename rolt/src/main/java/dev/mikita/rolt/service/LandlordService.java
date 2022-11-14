@@ -4,6 +4,7 @@ import dev.mikita.rolt.dao.LandlordDao;
 import dev.mikita.rolt.entity.ConsumerStatus;
 import dev.mikita.rolt.entity.Landlord;
 import dev.mikita.rolt.entity.PublicationStatus;
+import dev.mikita.rolt.entity.Tenant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,6 +52,13 @@ public class LandlordService {
         Objects.requireNonNull(user);
         user.getDetails().setStatus(ConsumerStatus.BANNED);
         user.getProperties().forEach(p -> p.setStatus(PublicationStatus.DELETED));
+        dao.update(user);
+    }
+
+    @Transactional
+    public void active(Landlord user) {
+        Objects.requireNonNull(user);
+        user.getDetails().setStatus(ConsumerStatus.ACTIVE);
         dao.update(user);
     }
 }

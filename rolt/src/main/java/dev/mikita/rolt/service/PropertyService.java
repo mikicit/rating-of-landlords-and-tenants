@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -36,6 +37,7 @@ public class PropertyService {
 
     @Transactional
     public void update(Property property) {
+        property.setUpdatedOn(new Date());
         dao.update(property);
     }
 
@@ -44,6 +46,20 @@ public class PropertyService {
         Objects.requireNonNull(property);
         property.setAvailable(false);
         property.setStatus(PublicationStatus.DELETED);
+        dao.update(property);
+    }
+
+    @Transactional
+    public void publish(Property property) {
+        Objects.requireNonNull(property);
+        property.setStatus(PublicationStatus.PUBLISHED);
+        dao.update(property);
+    }
+
+    @Transactional
+    public void moderate(Property property) {
+        Objects.requireNonNull(property);
+        property.setStatus(PublicationStatus.MODERATION);
         dao.update(property);
     }
 }

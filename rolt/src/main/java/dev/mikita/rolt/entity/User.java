@@ -70,6 +70,11 @@ public abstract class User implements Serializable {
 
     public void setLastLogin(Date lastLogin) {
         Objects.requireNonNull(lastLogin);
+
+        if (lastLogin.before(createdOn)) {
+            throw new IllegalArgumentException("The date of the last login must be later than the creation date.");
+        }
+
         this.lastLogin = lastLogin;
     }
 

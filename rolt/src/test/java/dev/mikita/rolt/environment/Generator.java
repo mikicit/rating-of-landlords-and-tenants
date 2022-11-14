@@ -2,6 +2,8 @@ package dev.mikita.rolt.environment;
 
 import dev.mikita.rolt.entity.*;
 
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.Random;
 
 public class Generator {
@@ -36,6 +38,12 @@ public class Generator {
 
         return city;
     }
+
+//    public static Contract generateContract() {
+//        final Contract contract = new Contract();
+//        contract.setStartDate(new Date());
+//        contract.setEndDate(Date.from(new LocalDateTime()));
+//    }
 
     public static Property generateProperty() {
         final Property property = new Property();

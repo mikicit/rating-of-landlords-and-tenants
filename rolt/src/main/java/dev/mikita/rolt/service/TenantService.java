@@ -25,6 +25,11 @@ public class TenantService {
     }
 
     @Transactional(readOnly = true)
+    public List<Tenant> findAllInSearch() {
+        return dao.findAllInSearch();
+    }
+
+    @Transactional(readOnly = true)
     public Tenant find(Integer id) {
         return dao.find(id);
     }
@@ -52,6 +57,13 @@ public class TenantService {
         Objects.requireNonNull(user);
         user.setInSearch(false);
         user.getDetails().setStatus(ConsumerStatus.BANNED);
+        dao.update(user);
+    }
+
+    @Transactional
+    public void active(Tenant user) {
+        Objects.requireNonNull(user);
+        user.getDetails().setStatus(ConsumerStatus.ACTIVE);
         dao.update(user);
     }
 }

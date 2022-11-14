@@ -2,8 +2,7 @@ package dev.mikita.rolt.entity;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.Date;
-import java.util.Objects;
+import java.util.*;
 
 @Entity
 @Table(name = "rolt_property")
@@ -22,8 +21,11 @@ public class Property implements Serializable {
     private Date updatedOn;
 
     @ManyToOne
-    @JoinColumn(nullable = false)
+    @JoinColumn(name = "owner_id", nullable = false)
     private Landlord owner;
+
+    @OneToMany(mappedBy = "property", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Contract> contracts;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
@@ -157,6 +159,31 @@ public class Property implements Serializable {
     public void setCity(City city) {
         Objects.requireNonNull(city);
         this.city = city;
+    }
+
+    public List<Contract> getContracts() {
+        return contracts;
+    }
+
+    public void setContracts(List<Contract> contracts) {
+        Objects.requireNonNull(contracts);
+        this.contracts = contracts;
+    }
+
+    public void addContract(Contract contract) {
+        Objects.requireNonNull(contract);
+
+        if (contracts == null) {
+            contracts = new ArrayList<>();
+        }
+
+        final Optional<Contract> existing = contracts.stream().filter(c -> c.getId()
+                .equals(contract.getId())).findAny();
+
+        if (existing.isEmpty()) {
+            contract.setLandlord(owner);
+            contracts.add(contract);
+        }
     }
 
     @Override

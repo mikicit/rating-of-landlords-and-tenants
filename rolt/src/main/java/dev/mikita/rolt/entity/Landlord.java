@@ -14,6 +14,9 @@ public class Landlord extends User {
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Property> properties;
 
+    @OneToMany(mappedBy = "reviewed", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Review> reviews;
+
     @Embedded
     private ConsumerDetails details;
 

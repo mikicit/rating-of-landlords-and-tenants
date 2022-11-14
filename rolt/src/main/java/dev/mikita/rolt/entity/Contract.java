@@ -6,6 +6,10 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "rolt_contract")
+@NamedQueries({
+        @NamedQuery(name = "Contract.findByProperty", query = "SELECT c from Contract c WHERE c.property = :property"),
+        @NamedQuery(name = "Contract.findByUser", query = "SELECT c from Contract c WHERE c.landlord = :user OR c.tenant = :user")
+})
 public class Contract {
     @Id
     @Column(name = "id")
@@ -25,15 +29,15 @@ public class Contract {
     private Date endDate;
 
     @ManyToOne
-    @JoinColumn(nullable = false)
+    @JoinColumn(name = "property_id", nullable = false)
     private Property property;
 
     @ManyToOne
-    @JoinColumn(nullable = false)
+    @JoinColumn(name = "tenant_id", nullable = false)
     private Tenant tenant;
 
     @ManyToOne
-    @JoinColumn(nullable = false)
+    @JoinColumn(name = "landlord_id", nullable = false)
     private Landlord landlord;
 
     public Integer getId() {

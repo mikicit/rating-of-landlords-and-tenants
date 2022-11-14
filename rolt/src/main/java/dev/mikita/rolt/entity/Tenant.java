@@ -14,7 +14,7 @@ public class Tenant extends User {
     @Embedded
     private ConsumerDetails details;
 
-    @OneToMany(mappedBy = "reviewed")
+    @OneToMany(mappedBy = "reviewed", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> reviews;
 
     @ManyToMany
