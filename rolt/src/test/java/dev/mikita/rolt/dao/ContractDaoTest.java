@@ -4,6 +4,8 @@ import dev.mikita.rolt.App;
 import dev.mikita.rolt.entity.*;
 import dev.mikita.rolt.environment.Generator;
 import dev.mikita.rolt.environment.TestConfiguration;
+import dev.mikita.rolt.exception.IncorrectDateRange;
+import dev.mikita.rolt.exception.IncorrectPropertyOwner;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -76,5 +78,75 @@ public class ContractDaoTest {
         final Property randomProperty = properties.get(Generator.randomInt(0, properties.size() - 1));
         final List<Contract> result = contractDao.findByProperty(randomProperty);
         result.forEach(c -> assertEquals(randomProperty, c.getProperty()));
+    }
+
+    @Test
+    public void persistContractWithIncorrectDateRangeReturnExceptions() {
+        final Tenant tenant = Generator.generateTenant();
+        final Landlord landlord = Generator.generateLandlord();
+        final City city = Generator.generateCity();
+        final Property property = Generator.generateProperty();
+        em.persist(tenant);
+        em.persist(landlord);
+        em.persist(city);
+
+        property.setOwner(landlord);
+        property.setCity(city);
+        em.persist(property);
+
+        final Contract contract = new Contract();
+
+        Calendar startDate = Calendar.getInstance();
+        Calendar endDate = Calendar.getInstance();
+        startDate.setTime(new Date());
+        startDate.add(Calendar.DATE, 2);
+        endDate.setTime(new Date());
+        endDate.add(Calendar.DATE, 1);
+
+        contract.setStartDate(startDate.getTime());
+        contract.setEndDate(endDate.getTime());
+        contract.setLandlord(landlord);
+        contract.setTenant(tenant);
+        contract.setProperty(property);
+
+        assertThrows(IncorrectDateRange.class, () -> {
+            em.persist(contract);
+        });
+    }
+
+    @Test
+    public void persistContractWithIncorrectLandlordReturnExceptions() {
+        final Tenant tenant = Generator.generateTenant();
+        final Landlord landlordOne = Generator.generateLandlord();
+        final Landlord landlordTwo = Generator.generateLandlord();
+        final City city = Generator.generateCity();
+        final Property property = Generator.generateProperty();
+        em.persist(tenant);
+        em.persist(landlordOne);
+        em.persist(landlordTwo);
+        em.persist(city);
+
+        property.setOwner(landlordOne);
+        property.setCity(city);
+        em.persist(property);
+
+        final Contract contract = new Contract();
+
+        Calendar startDate = Calendar.getInstance();
+        Calendar endDate = Calendar.getInstance();
+        startDate.setTime(new Date());
+        startDate.add(Calendar.DATE, 1);
+        endDate.setTime(new Date());
+        endDate.add(Calendar.DATE, 2);
+
+        contract.setStartDate(startDate.getTime());
+        contract.setEndDate(endDate.getTime());
+        contract.setLandlord(landlordTwo);
+        contract.setTenant(tenant);
+        contract.setProperty(property);
+
+        assertThrows(IncorrectPropertyOwner.class, () -> {
+            em.persist(contract);
+        });
     }
 }

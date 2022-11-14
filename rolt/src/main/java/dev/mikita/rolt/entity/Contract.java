@@ -1,5 +1,8 @@
 package dev.mikita.rolt.entity;
 
+import dev.mikita.rolt.exception.IncorrectDateRange;
+import dev.mikita.rolt.exception.IncorrectPropertyOwner;
+
 import javax.persistence.*;
 import java.util.Date;
 import java.util.Objects;
@@ -100,6 +103,21 @@ public class Contract {
     public void setLandlord(Landlord landlord) {
         Objects.requireNonNull(landlord);
         this.landlord = landlord;
+    }
+
+    @PrePersist
+    public void prePersist() {
+        // TODO Rethink having a reference to the owner and the date format.
+
+        // Start and End Date Check
+        if (endDate.before(startDate)) {
+            throw new IncorrectDateRange("The end date of the contract cannot be earlier than the start date of the contract.");
+        }
+
+        // Checking that the property owner is correct
+        if (!landlord.equals(property.getOwner())) {
+            throw new IncorrectPropertyOwner("Incorrect property owner");
+        }
     }
 
     @Override
