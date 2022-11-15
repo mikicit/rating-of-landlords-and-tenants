@@ -4,3 +4,4 @@
 **/node_modules
 **/generated-sources
 **/npm-debug.log
+**/.DS_Store		
