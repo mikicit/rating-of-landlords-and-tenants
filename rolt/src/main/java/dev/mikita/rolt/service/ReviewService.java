@@ -38,7 +38,6 @@ public class ReviewService {
     @Transactional
     public void update(Review review) {
         Objects.requireNonNull(review);
-        review.setUpdatedOn(new Date());
         dao.update(review);
     }
 

@@ -3,8 +3,8 @@ package dev.mikita.rolt.entity;
 import dev.mikita.rolt.environment.Generator;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -26,7 +26,7 @@ public class TenantTest {
         final Property propertyOne = Generator.generateProperty();
 
         propertyOne.setId(Generator.randomInt());
-        tenant.setFavorites(new ArrayList<>(Collections.singletonList(propertyOne)));
+        tenant.setFavorites(new HashSet<>(Collections.singletonList(propertyOne)));
 
         final Property propertyTwo = Generator.generateProperty();
         propertyTwo.setId(Generator.randomInt());

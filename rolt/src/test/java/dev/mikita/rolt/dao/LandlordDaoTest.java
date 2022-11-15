@@ -27,23 +27,20 @@ public class LandlordDaoTest {
     @Autowired
     private LandlordDao landlordDao;
 
-    @Autowired
-    private PropertyDao propertyDao;
-
     @Test
     public void findAllReturnsOnlyActiveLandlords() {
         final List<Landlord> landlords = IntStream.range(0, 10).mapToObj(i -> Generator.generateLandlord())
                 .collect(Collectors.toList());
 
         Landlord bannedLandlord = Generator.generateLandlord();
-        bannedLandlord.getDetails().setStatus(ConsumerStatus.BANNED);
+        bannedLandlord.setStatus(ConsumerStatus.BANNED);
         landlords.add(bannedLandlord);
 
         landlords.forEach(em::persist);
 
         final List<Landlord> result = landlordDao.findAll();
-        assertEquals(landlords.stream().filter(t -> t.getDetails().getStatus() == ConsumerStatus.ACTIVE).count(), result.size());
-        result.forEach(t -> assertSame(t.getDetails().getStatus(), ConsumerStatus.ACTIVE));
+        assertEquals(landlords.stream().filter(t -> t.getStatus() == ConsumerStatus.ACTIVE).count(), result.size());
+        result.forEach(t -> assertSame(t.getStatus(), ConsumerStatus.ACTIVE));
     }
 
     @Test
@@ -54,26 +51,31 @@ public class LandlordDaoTest {
         owner.addProperty(property);
         landlordDao.persist(owner);
 
-        assertTrue(propertyDao.exists(property.getId()));
+        assertNotNull(em.find(Property.class, property.getId()));
     }
 
     @Test
-    public void afterRemovingPropertyPropertyHasStatusRemoved() {
+    public void afterRemovingPropertyPropertyDoesNotExists() {
         final Landlord owner = Generator.generateLandlord();
-        final Property property = Generator.generateProperty();
+        landlordDao.persist(owner);
+
         final City city = Generator.generateCity();
         em.persist(city);
+
+        final Property property = Generator.generateProperty();
         property.setCity(city);
+        property.setId(1);
 
         owner.addProperty(property);
-        landlordDao.persist(owner);
-        owner.removeProperty(property);
         landlordDao.update(owner);
         em.flush();
 
-        Property result = propertyDao.find(property.getId());
+        final Property propertyForDeleting = em.find(Property.class, 1);
+        owner.removeProperty(propertyForDeleting);
+        landlordDao.update(owner);
 
-        assertNotNull(result);
-        assertSame(result.getStatus(), PublicationStatus.DELETED);
+        em.flush();
+
+        assertNull(em.find(Property.class, 1));
     }
 }

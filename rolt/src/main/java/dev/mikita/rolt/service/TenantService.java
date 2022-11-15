@@ -48,7 +48,7 @@ public class TenantService {
     public void remove(Tenant user) {
         Objects.requireNonNull(user);
         user.setInSearch(false);
-        user.getDetails().setStatus(ConsumerStatus.DELETED);
+        user.setStatus(ConsumerStatus.DELETED);
         dao.update(user);
     }
 
@@ -56,14 +56,14 @@ public class TenantService {
     public void block(Tenant user) {
         Objects.requireNonNull(user);
         user.setInSearch(false);
-        user.getDetails().setStatus(ConsumerStatus.BANNED);
+        user.setStatus(ConsumerStatus.BANNED);
         dao.update(user);
     }
 
     @Transactional
     public void active(Tenant user) {
         Objects.requireNonNull(user);
-        user.getDetails().setStatus(ConsumerStatus.ACTIVE);
+        user.setStatus(ConsumerStatus.ACTIVE);
         dao.update(user);
     }
 }

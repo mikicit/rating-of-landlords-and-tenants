@@ -2,6 +2,7 @@ package dev.mikita.rolt.environment;
 
 import dev.mikita.rolt.entity.*;
 
+import java.time.LocalDate;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Random;
@@ -42,13 +43,8 @@ public class Generator {
     public static Contract generateContract() {
         final Contract contract = new Contract();
 
-        Date startDate = new Date();
-        Calendar endDate = Calendar.getInstance();
-        endDate.setTime(startDate);
-        endDate.add(Calendar.DATE, randomInt(2, 90));
-
-        contract.setStartDate(new Date());
-        contract.setEndDate(endDate.getTime());
+        contract.setStartDate(LocalDate.now());
+        contract.setEndDate(LocalDate.now().plusDays(randomInt(1, 60)));
 
         return contract;
     }
@@ -74,34 +70,28 @@ public class Generator {
         return property;
     }
 
-    public static ConsumerDetails generateConsumerDetails() {
-        final ConsumerDetails details = new ConsumerDetails();
-        details.setFirstName("FirstName" + randomInt());
-        details.setLastName("LastName" + randomInt());
-        details.setPhone(String.valueOf(randomInt()));
-        details.setGender(ConsumerGender.MALE);
-
-        return details;
-    }
-
     public static Landlord generateLandlord() {
         final Landlord landlord = new Landlord();
-        final ConsumerDetails details = generateConsumerDetails();
 
         landlord.setEmail("randomemail" + randomInt() + "@gmail.com");
         landlord.setPassword("randompassword" + randomInt());
-        landlord.setDetails(details);
+        landlord.setFirstName("FirstName" + randomInt());
+        landlord.setLastName("LastName" + randomInt());
+        landlord.setPhone(String.valueOf(randomInt()));
+        landlord.setGender(ConsumerGender.MALE);
 
         return landlord;
     }
 
     public static Tenant generateTenant() {
         final Tenant tenant = new Tenant();
-        final ConsumerDetails details = generateConsumerDetails();
 
         tenant.setEmail("randomemail" + randomInt() + "@gmail.com");
         tenant.setPassword("randompassword" + randomInt());
-        tenant.setDetails(details);
+        tenant.setFirstName("FirstName" + randomInt());
+        tenant.setLastName("LastName" + randomInt());
+        tenant.setPhone(String.valueOf(randomInt()));
+        tenant.setGender(ConsumerGender.MALE);
 
         return tenant;
     }

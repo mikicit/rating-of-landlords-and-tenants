@@ -38,7 +38,6 @@ public class PropertyService {
     @Transactional
     public void update(Property property) {
         Objects.requireNonNull(property);
-        property.setUpdatedOn(new Date());
         dao.update(property);
     }
 

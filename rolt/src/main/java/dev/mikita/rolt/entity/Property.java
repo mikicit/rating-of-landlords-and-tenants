@@ -2,6 +2,7 @@ package dev.mikita.rolt.entity;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Entity
@@ -15,20 +16,15 @@ public class Property implements Serializable {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "created_on", nullable = false)
-    private Date createdOn = new Date();
+    @Column(name = "created_on", nullable = false, columnDefinition = "TIMESTAMP")
+    private LocalDateTime createdOn = LocalDateTime.now();
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "updated_on")
-    private Date updatedOn;
+    @Column(name = "updated_on", columnDefinition = "TIMESTAMP")
+    private LocalDateTime updatedOn;
 
     @ManyToOne
     @JoinColumn(name = "owner_id", nullable = false)
     private Landlord owner;
-
-    @OneToMany(mappedBy = "property", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Contract> contracts;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
@@ -65,21 +61,26 @@ public class Property implements Serializable {
         this.id = id;
     }
 
-    public Date getCreatedOn() {
+    public LocalDateTime getCreatedOn() {
         return createdOn;
     }
 
-    public void setCreatedOn(Date createdOn) {
+    public void setCreatedOn(LocalDateTime createdOn) {
         Objects.requireNonNull(createdOn);
         this.createdOn = createdOn;
     }
 
-    public Date getUpdatedOn() {
+    public LocalDateTime getUpdatedOn() {
         return updatedOn;
     }
 
-    public void setUpdatedOn(Date updatedOn) {
+    public void setUpdatedOn(LocalDateTime updatedOn) {
         Objects.requireNonNull(updatedOn);
+
+        if (updatedOn.isBefore(createdOn)) {
+            throw new IllegalArgumentException("The date of the last login must be later than the creation date.");
+        }
+
         this.updatedOn = updatedOn;
     }
 
@@ -164,36 +165,9 @@ public class Property implements Serializable {
         this.city = city;
     }
 
-    public List<Contract> getContracts() {
-        return contracts;
-    }
-
-    public void setContracts(List<Contract> contracts) {
-        Objects.requireNonNull(contracts);
-        this.contracts = contracts;
-    }
-
-    public void addContract(Contract contract) {
-        Objects.requireNonNull(contract);
-
-        if (contracts == null) {
-            contracts = new ArrayList<>();
-        }
-
-        final Optional<Contract> existing = contracts.stream().filter(c -> c
-                .equals(contract)).findAny();
-
-        if (existing.isEmpty()) {
-            contract.setLandlord(owner);
-            contracts.add(contract);
-        }
-    }
-
-    public void removeContract(Contract contract) {
-        Objects.requireNonNull(contract);
-        if (contracts == null) return;
-
-        contracts.remove(contract);
+    @PreUpdate
+    public void preUpdate() {
+        updatedOn = LocalDateTime.now();
     }
 
     @Override

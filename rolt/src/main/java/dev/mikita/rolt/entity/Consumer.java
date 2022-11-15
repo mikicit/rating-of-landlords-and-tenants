@@ -1,26 +1,26 @@
 package dev.mikita.rolt.entity;
 
 import javax.persistence.*;
-import java.io.Serializable;
 import java.util.Objects;
 
-@Embeddable
-public class ConsumerDetails implements Serializable {
-    @Column(table="rolt_consumer_details", name = "first_name", nullable = false, length = 32)
+@Entity
+@Table(name = "rolt_consumer")
+public abstract class Consumer extends User {
+    @Column(name = "first_name", nullable = false, length = 32)
     private String firstName;
 
-    @Column(table="rolt_consumer_details",name = "last_name", nullable = false, length = 32)
+    @Column(name = "last_name", nullable = false, length = 32)
     private String lastName;
 
-    @Column(table="rolt_consumer_details",name = "phone", nullable = false, length = 32)
+    @Column(name = "phone", nullable = false, length = 32)
     private String phone;
 
     @Enumerated(EnumType.STRING)
-    @Column(table="rolt_consumer_details",name = "gender", nullable = false)
+    @Column(name = "gender", nullable = false)
     private ConsumerGender gender;
 
     @Enumerated(EnumType.STRING)
-    @Column(table="rolt_consumer_details",name = "status", nullable = false)
+    @Column(name = "status", nullable = false)
     private ConsumerStatus status = ConsumerStatus.ACTIVE;
 
     public String getFirstName() {
@@ -71,19 +71,20 @@ public class ConsumerDetails implements Serializable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof ConsumerDetails)) return false;
-        ConsumerDetails details = (ConsumerDetails) o;
-        return firstName.equals(details.firstName) && lastName.equals(details.lastName) && phone.equals(details.phone) && gender == details.gender && status == details.status;
+        if (!(o instanceof Consumer)) return false;
+        if (!super.equals(o)) return false;
+        Consumer consumer = (Consumer) o;
+        return firstName.equals(consumer.firstName) && lastName.equals(consumer.lastName) && phone.equals(consumer.phone) && gender == consumer.gender && status == consumer.status;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(firstName, lastName, phone, gender, status);
+        return Objects.hash(super.hashCode(), firstName, lastName, phone, gender, status);
     }
 
     @Override
     public String toString() {
-        return "ConsumerDetails{" +
+        return "Consumer{" +
                 "firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
                 ", phone='" + phone + '\'' +

@@ -2,12 +2,12 @@ package dev.mikita.rolt.entity;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
 @Table(name = "rolt_user")
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn(name = "user_type")
 public abstract class User implements Serializable {
     @Id
@@ -21,13 +21,11 @@ public abstract class User implements Serializable {
     @Column(name = "password", nullable = false)
     private String password;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "created_on", nullable = false)
-    private Date createdOn = new Date();
+    @Column(name = "created_on", nullable = false, columnDefinition = "TIMESTAMP")
+    private LocalDateTime createdOn = LocalDateTime.now();
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "last_login")
-    private Date lastLogin;
+    @Column(name = "last_login", columnDefinition = "TIMESTAMP")
+    private LocalDateTime lastLogin;
 
     public Integer getId() {
         return id;
@@ -55,23 +53,23 @@ public abstract class User implements Serializable {
         this.password = password;
     }
 
-    public Date getCreatedOn() {
+    public LocalDateTime getCreatedOn() {
         return createdOn;
     }
 
-    public void setCreatedOn(Date createdOn) {
+    public void setCreatedOn(LocalDateTime createdOn) {
         Objects.requireNonNull(createdOn);
         this.createdOn = createdOn;
     }
 
-    public Date getLastLogin() {
+    public LocalDateTime getLastLogin() {
         return lastLogin;
     }
 
-    public void setLastLogin(Date lastLogin) {
+    public void setLastLogin(LocalDateTime lastLogin) {
         Objects.requireNonNull(lastLogin);
 
-        if (lastLogin.before(createdOn)) {
+        if (lastLogin.isBefore(createdOn)) {
             throw new IllegalArgumentException("The date of the last login must be later than the creation date.");
         }
 

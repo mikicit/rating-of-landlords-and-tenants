@@ -4,18 +4,16 @@ import dev.mikita.rolt.App;
 import dev.mikita.rolt.entity.*;
 import dev.mikita.rolt.environment.Generator;
 import dev.mikita.rolt.environment.TestConfiguration;
-import dev.mikita.rolt.exception.IncorrectDateRange;
-import dev.mikita.rolt.exception.IncorrectPropertyOwner;
+import dev.mikita.rolt.exception.IncorrectDateRangeException;
+import dev.mikita.rolt.exception.IncorrectPropertyOwnerException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.cglib.core.KeyFactory;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 
-import java.util.Calendar;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -58,16 +56,8 @@ public class ContractDaoTest {
             final Property p = properties.get(Generator.randomInt(0, properties.size() - 1));
             Contract contract = new Contract();
 
-            Calendar startDate = Calendar.getInstance();
-            Calendar endDate = Calendar.getInstance();
-            startDate.setTime(new Date());
-            startDate.add(Calendar.DATE, i);
-            endDate.setTime(new Date());
-            endDate.add(Calendar.DATE, i + 1);
-
-            contract.setStartDate(startDate.getTime());
-            contract.setEndDate(endDate.getTime());
-            contract.setLandlord(p.getOwner());
+            contract.setStartDate(LocalDate.now().plusDays(i));
+            contract.setEndDate(LocalDate.now().plusDays(i + 1));
             contract.setTenant(tenants.get(Generator.randomInt(0, tenants.size() - 1)));
             contract.setProperty(p);
 
@@ -96,56 +86,12 @@ public class ContractDaoTest {
 
         final Contract contract = new Contract();
 
-        Calendar startDate = Calendar.getInstance();
-        Calendar endDate = Calendar.getInstance();
-        startDate.setTime(new Date());
-        startDate.add(Calendar.DATE, 2);
-        endDate.setTime(new Date());
-        endDate.add(Calendar.DATE, 1);
-
-        contract.setStartDate(startDate.getTime());
-        contract.setEndDate(endDate.getTime());
-        contract.setLandlord(landlord);
+        contract.setStartDate(LocalDate.now());
+        contract.setEndDate(LocalDate.now().minusDays(1));
         contract.setTenant(tenant);
         contract.setProperty(property);
 
-        assertThrows(IncorrectDateRange.class, () -> {
-            em.persist(contract);
-        });
-    }
-
-    @Test
-    public void persistContractWithIncorrectLandlordReturnExceptions() {
-        final Tenant tenant = Generator.generateTenant();
-        final Landlord landlordOne = Generator.generateLandlord();
-        final Landlord landlordTwo = Generator.generateLandlord();
-        final City city = Generator.generateCity();
-        final Property property = Generator.generateProperty();
-        em.persist(tenant);
-        em.persist(landlordOne);
-        em.persist(landlordTwo);
-        em.persist(city);
-
-        property.setOwner(landlordOne);
-        property.setCity(city);
-        em.persist(property);
-
-        final Contract contract = new Contract();
-
-        Calendar startDate = Calendar.getInstance();
-        Calendar endDate = Calendar.getInstance();
-        startDate.setTime(new Date());
-        startDate.add(Calendar.DATE, 1);
-        endDate.setTime(new Date());
-        endDate.add(Calendar.DATE, 2);
-
-        contract.setStartDate(startDate.getTime());
-        contract.setEndDate(endDate.getTime());
-        contract.setLandlord(landlordTwo);
-        contract.setTenant(tenant);
-        contract.setProperty(property);
-
-        assertThrows(IncorrectPropertyOwner.class, () -> {
+        assertThrows(IncorrectDateRangeException.class, () -> {
             em.persist(contract);
         });
     }

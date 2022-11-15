@@ -2,6 +2,7 @@ package dev.mikita.rolt.service;
 
 import dev.mikita.rolt.dao.ContractDao;
 import dev.mikita.rolt.entity.*;
+import dev.mikita.rolt.exception.IncorrectDateRangeException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,6 +39,12 @@ public class ContractService {
 
     @Transactional
     public void persist(Contract contract) {
+        List<Contract> intersections = dao.findIntersectionsByDateRange(contract.getProperty(), contract.getStartDate(), contract.getEndDate());
+
+        if (intersections.size() > 0) {
+            throw new IncorrectDateRangeException("Contracts already exist in this date range.");
+        }
+
         dao.persist(contract);
     }
 

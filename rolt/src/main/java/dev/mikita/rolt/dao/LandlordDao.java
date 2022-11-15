@@ -11,7 +11,7 @@ public class LandlordDao extends BaseDao<Landlord> {
     @Override
     public List<Landlord> findAll() {
         try {
-            return em.createQuery("SELECT l FROM Landlord l WHERE l.details.status = dev.mikita.rolt.entity.ConsumerStatus.ACTIVE", Landlord.class).getResultList();
+            return em.createQuery("SELECT l FROM Landlord l WHERE l.status = dev.mikita.rolt.entity.ConsumerStatus.ACTIVE", Landlord.class).getResultList();
         } catch (RuntimeException e) {
             throw new PersistenceException(e);
         }

@@ -1,61 +1,60 @@
 package dev.mikita.rolt.service;
 
-import dev.mikita.rolt.dao.LandlordDao;
+import dev.mikita.rolt.dao.ConsumerDao;
+import dev.mikita.rolt.entity.Consumer;
 import dev.mikita.rolt.entity.ConsumerStatus;
-import dev.mikita.rolt.entity.Landlord;
-import dev.mikita.rolt.entity.PublicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 import java.util.Objects;
 
 @Service
-public class LandlordService {
-    private final LandlordDao dao;
+public class ConsumerService {
+    private final ConsumerDao dao;
 
     @Autowired
-    public LandlordService(LandlordDao dao) {
+    public ConsumerService(ConsumerDao dao) {
         this.dao = dao;
     }
 
     @Transactional(readOnly = true)
-    public List<Landlord> findAll() {
+    public List<Consumer> findAll() {
         return dao.findAll();
     }
 
     @Transactional(readOnly = true)
-    public Landlord find(Integer id) {
+    public Consumer find(Integer id) {
         return dao.find(id);
     }
 
     @Transactional
-    public void persist(Landlord user) {
-        dao.persist(user);
+    public void persist(Consumer city) {
+        dao.persist(city);
     }
 
     @Transactional
-    public void update(Landlord user) {
-        dao.update(user);
+    public void update(Consumer city) {
+        dao.update(city);
     }
 
     @Transactional
-    public void remove(Landlord user) {
+    public void remove(Consumer user) {
         Objects.requireNonNull(user);
         user.setStatus(ConsumerStatus.DELETED);
         dao.update(user);
     }
 
     @Transactional
-    public void block(Landlord user) {
+    public void block(Consumer user) {
         Objects.requireNonNull(user);
         user.setStatus(ConsumerStatus.BANNED);
-        user.getProperties().forEach(p -> p.setStatus(PublicationStatus.DELETED));
         dao.update(user);
     }
 
     @Transactional
-    public void active(Landlord user) {
+    public void active(Consumer user) {
         Objects.requireNonNull(user);
         user.setStatus(ConsumerStatus.ACTIVE);
         dao.update(user);

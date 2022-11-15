@@ -3,8 +3,8 @@ package dev.mikita.rolt.entity;
 import dev.mikita.rolt.environment.Generator;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -14,7 +14,6 @@ public class LandlordTest {
         final Landlord owner = Generator.generateLandlord();
         final Property property = Generator.generateProperty();
 
-        property.setId(Generator.randomInt());
         owner.addProperty(property);
 
         assertEquals(1, owner.getProperties().size());
@@ -25,13 +24,13 @@ public class LandlordTest {
         final Landlord owner = Generator.generateLandlord();
         final Property propertyOne = Generator.generateProperty();
 
-        propertyOne.setId(Generator.randomInt());
-        owner.setProperties(new ArrayList<>(Collections.singletonList(propertyOne)));
+        propertyOne.setId(1);
+        owner.setProperties(new HashSet<>(Collections.singletonList(propertyOne)));
 
         final Property propertyTwo = Generator.generateProperty();
-        propertyTwo.setId(Generator.randomInt());
-
+        propertyTwo.setId(2);
         owner.addProperty(propertyTwo);
+
         assertEquals(2, owner.getProperties().size());
     }
 
@@ -52,7 +51,7 @@ public class LandlordTest {
         final Landlord owner = Generator.generateLandlord();
         final Property property = Generator.generateProperty();
 
-        property.setId(Generator.randomInt());
+        property.setId(1);
         owner.addProperty(property);
         owner.addProperty(property);
 
@@ -64,7 +63,7 @@ public class LandlordTest {
         final Landlord owner = Generator.generateLandlord();
         final Property property = Generator.generateProperty();
 
-        property.setId(Generator.randomInt());
+        property.setId(1);
         owner.addProperty(property);
         owner.removeProperty(property);
 

@@ -34,14 +34,14 @@ public class TenantDaoTest {
                 .collect(Collectors.toList());
 
         Tenant bannedTenant = Generator.generateTenant();
-        bannedTenant.getDetails().setStatus(ConsumerStatus.BANNED);
+        bannedTenant.setStatus(ConsumerStatus.BANNED);
         tenants.add(bannedTenant);
 
         tenants.forEach(em::persist);
 
         final List<Tenant> result = tenantDao.findAll();
-        assertEquals(tenants.stream().filter(t -> t.getDetails().getStatus() == ConsumerStatus.ACTIVE).count(), result.size());
-        result.forEach(t -> assertSame(t.getDetails().getStatus(), ConsumerStatus.ACTIVE));
+        assertEquals(tenants.stream().filter(t -> t.getStatus() == ConsumerStatus.ACTIVE).count(), result.size());
+        result.forEach(t -> assertSame(t.getStatus(), ConsumerStatus.ACTIVE));
     }
 
     @Test
@@ -54,7 +54,7 @@ public class TenantDaoTest {
                 .collect(Collectors.toList());
 
         Tenant bannedTenant = Generator.generateTenant();
-        bannedTenant.getDetails().setStatus(ConsumerStatus.BANNED);
+        bannedTenant.setStatus(ConsumerStatus.BANNED);
         tenants.add(bannedTenant);
 
         Tenant notInSearchTenant = Generator.generateTenant();
@@ -63,7 +63,7 @@ public class TenantDaoTest {
         tenants.forEach(em::persist);
 
         final List<Tenant> result = tenantDao.findAllInSearch();
-        assertEquals(tenants.stream().filter(t -> t.getDetails().getStatus() == ConsumerStatus.ACTIVE && t.getInSearch()).count(), result.size());
-        result.forEach(t -> assertTrue(t.getDetails().getStatus() == ConsumerStatus.ACTIVE && t.getInSearch()));
+        assertEquals(tenants.stream().filter(t -> t.getStatus() == ConsumerStatus.ACTIVE && t.getInSearch()).count(), result.size());
+        result.forEach(t -> assertTrue(t.getStatus() == ConsumerStatus.ACTIVE && t.getInSearch()));
     }
 }
