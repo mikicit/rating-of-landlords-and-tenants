@@ -5,7 +5,6 @@ import dev.mikita.rolt.entity.Property;
 import dev.mikita.rolt.entity.User;
 import dev.mikita.rolt.exception.PersistenceException;
 import org.springframework.stereotype.Repository;
-
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;

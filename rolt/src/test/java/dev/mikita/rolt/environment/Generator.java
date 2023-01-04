@@ -1,10 +1,7 @@
 package dev.mikita.rolt.environment;
 
 import dev.mikita.rolt.entity.*;
-
 import java.time.LocalDate;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.Random;
 
 public class Generator {

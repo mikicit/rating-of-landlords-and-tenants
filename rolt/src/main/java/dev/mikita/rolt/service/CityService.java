@@ -10,35 +10,35 @@ import java.util.List;
 
 @Service
 public class CityService {
-    private final CityDao dao;
+    private final CityDao cityDao;
 
     @Autowired
-    public CityService(CityDao dao) {
-        this.dao = dao;
+    public CityService(CityDao cityDao) {
+        this.cityDao = cityDao;
     }
 
     @Transactional(readOnly = true)
     public List<City> findAll() {
-        return dao.findAll();
+        return cityDao.findAll();
     }
 
     @Transactional(readOnly = true)
     public City find(Integer id) {
-        return dao.find(id);
+        return cityDao.find(id);
     }
 
     @Transactional
     public void persist(City city) {
-        dao.persist(city);
+        cityDao.persist(city);
     }
 
     @Transactional
     public void update(City city) {
-        dao.update(city);
+        cityDao.update(city);
     }
 
     @Transactional
     public void remove(City city) {
-        dao.remove(city);
+        cityDao.remove(city);
     }
 }

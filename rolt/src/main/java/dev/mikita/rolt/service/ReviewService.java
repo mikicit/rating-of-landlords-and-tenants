@@ -6,59 +6,57 @@ import dev.mikita.rolt.entity.Review;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
 @Service
 public class ReviewService {
-    private final ReviewDao dao;
+    private final ReviewDao reviewDao;
 
     @Autowired
-    public ReviewService(ReviewDao dao) {
-        this.dao = dao;
+    public ReviewService(ReviewDao reviewDao) {
+        this.reviewDao = reviewDao;
     }
 
     @Transactional(readOnly = true)
     public List<Review> findAll() {
-        return dao.findAll();
+        return reviewDao.findAll();
     }
 
     @Transactional(readOnly = true)
     public Review find(Integer id) {
-        return dao.find(id);
+        return reviewDao.find(id);
     }
 
     @Transactional
     public void persist(Review review) {
-        dao.persist(review);
+        reviewDao.persist(review);
     }
 
     @Transactional
     public void update(Review review) {
         Objects.requireNonNull(review);
-        dao.update(review);
+        reviewDao.update(review);
     }
 
     @Transactional
     public void remove(Review review) {
         Objects.requireNonNull(review);
         review.setStatus(PublicationStatus.DELETED);
-        dao.update(review);
+        reviewDao.update(review);
     }
 
     @Transactional
     public void publish(Review review) {
         Objects.requireNonNull(review);
         review.setStatus(PublicationStatus.PUBLISHED);
-        dao.update(review);
+        reviewDao.update(review);
     }
 
     @Transactional
     public void moderate(Review review) {
         Objects.requireNonNull(review);
         review.setStatus(PublicationStatus.MODERATION);
-        dao.update(review);
+        reviewDao.update(review);
     }
 }

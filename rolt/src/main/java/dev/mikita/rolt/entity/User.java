@@ -9,6 +9,9 @@ import java.util.Objects;
 @Table(name = "rolt_user")
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn(name = "user_type")
+@NamedQueries({
+        @NamedQuery(name = "User.findByEmail", query = "SELECT u from User u WHERE u.email = :email")
+})
 public abstract class User implements Serializable {
     @Id
     @Column(name = "id")
@@ -26,6 +29,10 @@ public abstract class User implements Serializable {
 
     @Column(name = "last_login", columnDefinition = "TIMESTAMP")
     private LocalDateTime lastLogin;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", updatable = false, insertable = false)
+    protected Role role;
 
     public Integer getId() {
         return id;
@@ -74,6 +81,15 @@ public abstract class User implements Serializable {
         }
 
         this.lastLogin = lastLogin;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        Objects.requireNonNull(role);
+        this.role = role;
     }
 
     @Override

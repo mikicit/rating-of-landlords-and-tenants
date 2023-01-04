@@ -10,51 +10,51 @@ import java.util.List;
 
 @Service
 public class ContractService {
-    private final ContractDao dao;
+    private final ContractDao contractDao;
 
     @Autowired
-    public ContractService(ContractDao dao) {
-        this.dao = dao;
+    public ContractService(ContractDao contractDao) {
+        this.contractDao = contractDao;
     }
 
     @Transactional(readOnly = true)
     public List<Contract> findAll() {
-        return dao.findAll();
+        return contractDao.findAll();
     }
 
     @Transactional(readOnly = true)
     public List<Contract> findByProperty(Property property) {
-        return dao.findByProperty(property);
+        return contractDao.findByProperty(property);
     }
 
     @Transactional(readOnly = true)
     public List<Contract> findByUser(User user) {
-        return dao.findByUser(user);
+        return contractDao.findByUser(user);
     }
 
     @Transactional(readOnly = true)
     public Contract find(Integer id) {
-        return dao.find(id);
+        return contractDao.find(id);
     }
 
     @Transactional
     public void persist(Contract contract) {
-        List<Contract> intersections = dao.findIntersectionsByDateRange(contract.getProperty(), contract.getStartDate(), contract.getEndDate());
+        List<Contract> intersections = contractDao.findIntersectionsByDateRange(contract.getProperty(), contract.getStartDate(), contract.getEndDate());
 
         if (intersections.size() > 0) {
             throw new IncorrectDateRangeException("Contracts already exist in this date range.");
         }
 
-        dao.persist(contract);
+        contractDao.persist(contract);
     }
 
     @Transactional
     public void update(Contract contract) {
-        dao.update(contract);
+        contractDao.update(contract);
     }
 
     @Transactional
     public void remove(Contract contract) {
-        dao.remove(contract);
+        contractDao.remove(contract);
     }
 }

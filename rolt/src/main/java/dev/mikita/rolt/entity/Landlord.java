@@ -10,6 +10,8 @@ public class Landlord extends Consumer {
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Property> properties;
 
+    public Landlord() {}
+
     public Set<Property> getProperties() {
         return properties;
     }

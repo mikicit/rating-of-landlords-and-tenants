@@ -4,7 +4,6 @@ import dev.mikita.rolt.entity.Consumer;
 import dev.mikita.rolt.entity.Review;
 import dev.mikita.rolt.exception.PersistenceException;
 import org.springframework.stereotype.Repository;
-
 import java.util.List;
 import java.util.Objects;
 

@@ -8,7 +8,8 @@ import java.util.*;
 @Entity
 @Table(name = "rolt_property")
 @NamedQueries({
-        @NamedQuery(name = "Property.findByOwner", query = "SELECT p from Property p WHERE p.owner = :owner")
+        @NamedQuery(name = "Property.findByOwner", query = "SELECT p from Property p WHERE p.owner = :owner"),
+        @NamedQuery(name = "Property.findByOwnerPublished", query = "SELECT p from Property p WHERE p.owner = :owner AND p.status = dev.mikita.rolt.entity.PublicationStatus.PUBLISHED")
 })
 public class Property implements Serializable {
     @Id
@@ -35,7 +36,7 @@ public class Property implements Serializable {
     private PropertyType type;
 
     @Column(name = "is_available", nullable = false)
-    private Boolean isAvailable = false;
+    private Boolean isAvailable = true;
 
     @Column(name = "square", nullable = false)
     private Double square;

@@ -1,7 +1,6 @@
 package dev.mikita.rolt.dao;
 
 import dev.mikita.rolt.exception.PersistenceException;
-
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.lang.reflect.ParameterizedType;

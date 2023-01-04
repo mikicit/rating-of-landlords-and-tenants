@@ -1,7 +1,6 @@
 package dev.mikita.rolt.entity;
 
 import dev.mikita.rolt.exception.IncorrectConsumerException;
-
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;

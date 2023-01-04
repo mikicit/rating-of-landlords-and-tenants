@@ -13,6 +13,8 @@ public class Tenant extends Consumer {
     @ManyToMany
     private Set<Property> favorites;
 
+    public Tenant() {}
+
     public Boolean getInSearch() {
         return inSearch;
     }

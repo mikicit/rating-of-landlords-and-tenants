@@ -5,40 +5,44 @@ import dev.mikita.rolt.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 
 @Service
 public class UserService {
-    private final UserDao dao;
+    private final UserDao userDao;
 
     @Autowired
-    public UserService(UserDao dao) {
-        this.dao = dao;
+    public UserService(UserDao userDao) {
+        this.userDao = userDao;
     }
 
     @Transactional(readOnly = true)
     public List<User> findAll() {
-        return dao.findAll();
+        return userDao.findAll();
     }
 
     @Transactional(readOnly = true)
     public User find(Integer id) {
-        return dao.find(id);
+        return userDao.find(id);
     }
 
     @Transactional
     public void persist(User user) {
-        dao.persist(user);
+        userDao.persist(user);
     }
 
     @Transactional
     public void update(User user) {
-        dao.update(user);
+        userDao.update(user);
     }
 
     @Transactional
     public void remove(User user) {
-        dao.remove(user);
+        userDao.remove(user);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean exists(String email) {
+        return userDao.findByEmail(email) != null;
     }
 }

@@ -5,5 +5,4 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public class CityDao extends BaseDao<City> {
-    
 }
