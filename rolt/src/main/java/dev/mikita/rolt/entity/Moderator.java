@@ -8,5 +8,7 @@ import javax.persistence.Table;
 @Table(name = "rolt_moderator")
 @DiscriminatorValue("moderator")
 public class Moderator extends User {
-    public Moderator() {}
+    public Moderator() {
+        this.role = Role.MODERATOR;
+    }
 }

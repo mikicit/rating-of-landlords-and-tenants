@@ -1,7 +1,6 @@
 package dev.mikita.rolt.dao;
 
 import dev.mikita.rolt.entity.User;
-import dev.mikita.rolt.exception.PersistenceException;
 import org.springframework.stereotype.Repository;
 import java.util.Objects;
 
@@ -13,7 +12,7 @@ public class UserDao extends BaseDao<User> {
             return em.createNamedQuery("User.findByEmail", User.class).setParameter("email", email)
                     .getSingleResult();
         } catch (RuntimeException e) {
-            throw new PersistenceException(e);
+            return null;
         }
     }
 }

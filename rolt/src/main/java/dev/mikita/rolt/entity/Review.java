@@ -45,7 +45,6 @@ public class Review implements Serializable {
     @Column(name = "rating", nullable = false)
     private Integer rating;
 
-
     public Integer getId() {
         return id;
     }

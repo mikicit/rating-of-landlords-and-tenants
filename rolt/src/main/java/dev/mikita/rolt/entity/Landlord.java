@@ -1,5 +1,7 @@
 package dev.mikita.rolt.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 import java.util.*;
 
@@ -7,10 +9,13 @@ import java.util.*;
 @Table(name = "rolt_landlord")
 @DiscriminatorValue("landlord")
 public class Landlord extends Consumer {
+    @JsonIgnore
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Property> properties;
 
-    public Landlord() {}
+    public Landlord() {
+        this.role = Role.LANDLORD;
+    }
 
     public Set<Property> getProperties() {
         return properties;

@@ -1,5 +1,6 @@
 package dev.mikita.rolt.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import javax.persistence.*;
 import java.util.*;
 
@@ -10,10 +11,13 @@ public class Tenant extends Consumer {
     @Column(name = "in_search")
     private Boolean inSearch = false;
 
-    @ManyToMany
+    @JsonIgnore
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<Property> favorites;
 
-    public Tenant() {}
+    public Tenant() {
+        this.role = Role.TENANT;
+    }
 
     public Boolean getInSearch() {
         return inSearch;

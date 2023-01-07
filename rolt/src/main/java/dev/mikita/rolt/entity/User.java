@@ -31,7 +31,7 @@ public abstract class User implements Serializable {
     private LocalDateTime lastLogin;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "role", updatable = false, insertable = false)
+    @Column(name = "role", nullable = false)
     protected Role role;
 
     public Integer getId() {

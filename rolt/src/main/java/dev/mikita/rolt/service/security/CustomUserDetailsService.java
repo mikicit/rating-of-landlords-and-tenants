@@ -2,17 +2,19 @@ package dev.mikita.rolt.service.security;
 
 import dev.mikita.rolt.dao.UserDao;
 import dev.mikita.rolt.entity.User;
-import dev.mikita.rolt.security.model.UserDetails;
+import dev.mikita.rolt.security.model.CustomUserDetails;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
-public class UserDetailsService implements org.springframework.security.core.userdetails.UserDetailsService {
+public class CustomUserDetailsService implements UserDetailsService {
     private final UserDao userDao;
 
     @Autowired
-    public UserDetailsService(UserDao userDao) {
+    public CustomUserDetailsService(UserDao userDao) {
         this.userDao = userDao;
     }
 
@@ -22,6 +24,6 @@ public class UserDetailsService implements org.springframework.security.core.use
         if (user == null) {
             throw new UsernameNotFoundException("User with email " + email + " not found.");
         }
-        return new UserDetails(user);
+        return new CustomUserDetails(user);
     }
 }

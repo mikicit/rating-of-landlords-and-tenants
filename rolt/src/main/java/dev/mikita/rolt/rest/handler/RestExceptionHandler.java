@@ -2,17 +2,18 @@ package dev.mikita.rolt.rest.handler;
 
 import dev.mikita.rolt.exception.NotFoundException;
 import dev.mikita.rolt.exception.PersistenceException;
-import dev.mikita.rolt.exception.ValidationException;
-import dev.mikita.rolt.security.SecurityUtils;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.ValidationException;
 
 /**
  * Exception handlers for REST controllers.
@@ -25,8 +26,8 @@ import javax.servlet.http.HttpServletRequest;
 public class RestExceptionHandler {
     private static final Logger LOG = LoggerFactory.getLogger(RestExceptionHandler.class);
 
-    private static void logException(RuntimeException ex) {
-        LOG.error("Exception caught:", ex);
+    private static void logException(Exception exception) {
+        LOG.error("Exception caught:", exception);
     }
 
     private static ErrorInfo errorInfo(HttpServletRequest request, Throwable e) {
@@ -45,29 +46,35 @@ public class RestExceptionHandler {
         return new ResponseEntity<>(errorInfo(request, e), HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(ValidationException.class)
-    public ResponseEntity<ErrorInfo> validation(HttpServletRequest request, ValidationException e) {
+    @ExceptionHandler(dev.mikita.rolt.exception.ValidationException.class)
+    public ResponseEntity<ErrorInfo> validation(HttpServletRequest request, dev.mikita.rolt.exception.ValidationException e) {
         logException(e);
         return new ResponseEntity<>(errorInfo(request, e), HttpStatus.CONFLICT);
     }
 
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<ErrorInfo> accessDenied(HttpServletRequest request, AccessDeniedException e) {
-        // Spring Boot throws Access Denied when trying to access a secured method with anonymous authentication token
-        // We want to let such exception out, so that it is handled by the authentication entry point (which returns 401)
-        if (SecurityUtils.isAuthenticatedAnonymously()) {
-            throw e;
-        }
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorInfo> validation(HttpServletRequest request, MethodArgumentNotValidException e) {
         logException(e);
-        return new ResponseEntity<>(errorInfo(request, e), HttpStatus.FORBIDDEN);
+        return new ResponseEntity<>(errorInfo(request, e), HttpStatus.CONFLICT);
     }
 
-    @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<ErrorInfo> badCredentials(HttpServletRequest request, BadCredentialsException e) {
-        if (SecurityUtils.isAuthenticatedAnonymously()) {
-            throw e;
-        }
-        logException(e);
-        return new ResponseEntity<>(errorInfo(request, e), HttpStatus.UNAUTHORIZED);
-    }
+//    @ExceptionHandler(AccessDeniedException.class)
+//    public ResponseEntity<ErrorInfo> accessDenied(HttpServletRequest request, AccessDeniedException e) {
+//        // Spring Boot throws Access Denied when trying to access a secured method with anonymous authentication token
+//        // We want to let such exception out, so that it is handled by the authentication entry point (which returns 401)
+//        if (SecurityUtils.isAuthenticatedAnonymously()) {
+//            throw e;
+//        }
+//        logException(e);
+//        return new ResponseEntity<>(errorInfo(request, e), HttpStatus.FORBIDDEN);
+//    }
+//
+//    @ExceptionHandler(BadCredentialsException.class)
+//    public ResponseEntity<ErrorInfo> badCredentials(HttpServletRequest request, BadCredentialsException e) {
+//        if (SecurityUtils.isAuthenticatedAnonymously()) {
+//            throw e;
+//        }
+//        logException(e);
+//        return new ResponseEntity<>(errorInfo(request, e), HttpStatus.UNAUTHORIZED);
+//    }
 }

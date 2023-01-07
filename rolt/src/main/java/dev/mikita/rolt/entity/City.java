@@ -12,7 +12,7 @@ public class City implements Serializable {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
 
-    @Column(name = "name", nullable = false, length = 64)
+    @Column(name = "name", nullable = false, length = 64, unique = true)
     private String name;
 
     public Integer getId() {

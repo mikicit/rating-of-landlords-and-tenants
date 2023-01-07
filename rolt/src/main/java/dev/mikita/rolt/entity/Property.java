@@ -51,7 +51,7 @@ public class Property implements Serializable {
     private String postalCode;
 
     @ManyToOne
-    @JoinColumn(nullable = false)
+    @JoinColumn(name = "city", nullable = false)
     private City city;
 
     public Integer getId() {
