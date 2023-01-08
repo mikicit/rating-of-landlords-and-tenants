@@ -52,10 +52,6 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-//        if (user instanceof Consumer) {
-//            return ((Consumer) user).getStatus() == ConsumerStatus.ACTIVE;
-//        }
-
         return true;
     }
 
@@ -71,5 +67,9 @@ public class CustomUserDetails implements UserDetails {
 
     public User getUser() {
         return user;
+    }
+
+    public void eraseCredentials() {
+        user.erasePassword();
     }
 }

@@ -53,6 +53,7 @@ public class CityController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_MODERATOR', 'ROLE_TENANT', 'ROLE_LANDLORD')")
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public City getCity(@PathVariable Integer id) {
         final City city = cityService.find(id);

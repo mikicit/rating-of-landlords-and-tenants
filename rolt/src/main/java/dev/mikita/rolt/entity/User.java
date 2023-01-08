@@ -1,5 +1,7 @@
 package dev.mikita.rolt.entity;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -47,7 +49,6 @@ public abstract class User implements Serializable {
     }
 
     public void setEmail(String email) {
-        Objects.requireNonNull(email);
         this.email = email;
     }
 
@@ -56,8 +57,15 @@ public abstract class User implements Serializable {
     }
 
     public void setPassword(String password) {
-        Objects.requireNonNull(password);
         this.password = password;
+    }
+
+    public void encodePassword(PasswordEncoder encoder) {
+        this.password = encoder.encode(password);
+    }
+
+    public void erasePassword() {
+        this.password = null;
     }
 
     public LocalDateTime getCreatedOn() {
@@ -65,7 +73,6 @@ public abstract class User implements Serializable {
     }
 
     public void setCreatedOn(LocalDateTime createdOn) {
-        Objects.requireNonNull(createdOn);
         this.createdOn = createdOn;
     }
 
@@ -88,15 +95,13 @@ public abstract class User implements Serializable {
     }
 
     public void setRole(Role role) {
-        Objects.requireNonNull(role);
         this.role = role;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof User)) return false;
-        User user = (User) o;
+        if (!(o instanceof User user)) return false;
         return Objects.equals(id, user.id) && Objects.equals(email, user.email);
     }
 

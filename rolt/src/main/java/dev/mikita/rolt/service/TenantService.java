@@ -1,18 +1,18 @@
 package dev.mikita.rolt.service;
 
-import dev.mikita.rolt.dao.PropertyDao;
 import dev.mikita.rolt.dao.TenantDao;
+import dev.mikita.rolt.dao.UserDao;
 import dev.mikita.rolt.entity.ConsumerStatus;
 import dev.mikita.rolt.entity.Property;
 import dev.mikita.rolt.entity.Role;
 import dev.mikita.rolt.entity.Tenant;
+import dev.mikita.rolt.exception.ValidationException;
 import org.springframework.data.domain.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -20,16 +20,16 @@ import java.util.Set;
 @Service
 public class TenantService {
     private final TenantDao tenantDao;
-    private final PropertyDao propertyDao;
+    private final UserDao userDao;
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
     public TenantService(TenantDao tenantDao,
                          PasswordEncoder passwordEncoder,
-                         PropertyDao propertyDao) {
+                         UserDao userDao) {
         this.tenantDao = tenantDao;
         this.passwordEncoder = passwordEncoder;
-        this.propertyDao = propertyDao;
+        this.userDao = userDao;
     }
 
     @Transactional(readOnly = true)
@@ -44,8 +44,13 @@ public class TenantService {
 
     @Transactional
     public void persist(Tenant user) {
+        Objects.requireNonNull(user);
+        if (userDao.findByEmail(user.getEmail()) == null) {
+            throw new ValidationException("A user with this email already exists.");
+        }
+
         user.setRole(Role.TENANT);
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.encodePassword(passwordEncoder);
         tenantDao.persist(user);
     }
 

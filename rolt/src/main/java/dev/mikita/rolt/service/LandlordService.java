@@ -1,7 +1,9 @@
 package dev.mikita.rolt.service;
 
 import dev.mikita.rolt.dao.LandlordDao;
+import dev.mikita.rolt.dao.UserDao;
 import dev.mikita.rolt.entity.*;
+import dev.mikita.rolt.exception.ValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,12 +16,17 @@ import java.util.Objects;
 @Service
 public class LandlordService {
     private final LandlordDao landlordDao;
+    private final UserDao userDao;
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public LandlordService(LandlordDao landlordDao, PasswordEncoder passwordEncoder) {
+    public LandlordService(
+            LandlordDao landlordDao,
+            PasswordEncoder passwordEncoder,
+            UserDao userDao) {
         this.landlordDao = landlordDao;
         this.passwordEncoder = passwordEncoder;
+        this.userDao = userDao;
     }
 
     @Transactional(readOnly = true)
@@ -34,8 +41,13 @@ public class LandlordService {
 
     @Transactional
     public void persist(Landlord user) {
+        Objects.requireNonNull(user);
+        if (userDao.findByEmail(user.getEmail()) == null) {
+            throw new ValidationException("A user with this email already exists.");
+        }
+
         user.setRole(Role.LANDLORD);
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.encodePassword(passwordEncoder);
         landlordDao.persist(user);
     }
 
