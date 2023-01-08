@@ -1,15 +1,14 @@
 package dev.mikita.rolt.service;
 
 import dev.mikita.rolt.dao.LandlordDao;
-import dev.mikita.rolt.entity.ConsumerStatus;
-import dev.mikita.rolt.entity.Landlord;
-import dev.mikita.rolt.entity.PublicationStatus;
-import dev.mikita.rolt.entity.Role;
+import dev.mikita.rolt.entity.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @Service
@@ -24,8 +23,8 @@ public class LandlordService {
     }
 
     @Transactional(readOnly = true)
-    public List<Landlord> findAll() {
-        return landlordDao.findAll();
+    public Page<Landlord> findAll(Pageable pageable, Map<String, Object> filters) {
+        return landlordDao.findAll(pageable, filters);
     }
 
     @Transactional(readOnly = true)

@@ -3,9 +3,7 @@ package dev.mikita.rolt.rest;
 import dev.mikita.rolt.dto.property.RequestCreatePropertyDto;
 import dev.mikita.rolt.dto.property.RequestUpdatePropertyDto;
 import dev.mikita.rolt.dto.property.ResponsePublicPropertyDto;
-import dev.mikita.rolt.entity.City;
-import dev.mikita.rolt.entity.Landlord;
-import dev.mikita.rolt.entity.Property;
+import dev.mikita.rolt.entity.*;
 import dev.mikita.rolt.exception.NotFoundException;
 import dev.mikita.rolt.exception.ValidationException;
 import dev.mikita.rolt.rest.util.RestUtils;
@@ -16,6 +14,9 @@ import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -23,7 +24,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -45,23 +48,46 @@ public class PropertyController {
     }
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<ResponsePublicPropertyDto> getProperties(@RequestParam(required = false) Boolean isAvailable) {
+    public ResponseEntity<Map<String, Object>> getProperties(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) Integer cityId,
+            @RequestParam(required = false) PropertyType propertyType,
+            @RequestParam(required = false) Integer minSquare,
+            @RequestParam(required = false) Integer maxSquare,
+            @RequestParam(required = false) Boolean isAvailable) {
+
         ModelMapper modelMapper = new ModelMapper();
-        List<Property> result;
 
-        if (isAvailable == null) {
-            result = propertyService.findAll();
-        } else {
-            result = propertyService.findAllAvailable();
-        }
+        // Filters
+        Map<String, Object> filters = new HashMap<>();
+        if (cityId != null) filters.put("cityId", cityId);
+        if (propertyType != null) filters.put("propertyType", propertyType);
+        if (minSquare != null) filters.put("minSquare", minSquare);
+        if (maxSquare != null) filters.put("maxSquare", maxSquare);
+        if (isAvailable != null) filters.put("isAvailable", isAvailable);
+        filters.put("status", PublicationStatus.PUBLISHED);
 
-        return result.stream().map(property -> modelMapper.map(property, ResponsePublicPropertyDto.class)).collect(Collectors.toList());
+        // Pagination and sorting
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Property> pageProperties = propertyService.findAll(pageable, filters);
+        List<Property> properties = pageProperties.getContent();
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("properties", properties.stream()
+                .map(property -> modelMapper.map(property, ResponsePublicPropertyDto.class))
+                .collect(Collectors.toList()));
+        response.put("currentPage", pageProperties.getNumber());
+        response.put("totalItems", pageProperties.getTotalElements());
+        response.put("totalPages", pageProperties.getTotalPages());
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponsePublicPropertyDto getProperty(@PathVariable Integer id) {
         final Property property = propertyService.find(id);
-        if (property == null) {
+        if (property == null || property.getStatus() != PublicationStatus.PUBLISHED) {
             throw NotFoundException.create("Property", id);
         }
         return new ModelMapper().map(property, ResponsePublicPropertyDto.class);
@@ -95,7 +121,7 @@ public class PropertyController {
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateProperty(@PathVariable Integer id, @RequestBody @Valid RequestUpdatePropertyDto propertyDto) {
-        final Property original = propertyService.find(id);
+        final Property original = propertyService.findPublished(id);
         if (original == null) {
             throw NotFoundException.create("Property", id);
         }

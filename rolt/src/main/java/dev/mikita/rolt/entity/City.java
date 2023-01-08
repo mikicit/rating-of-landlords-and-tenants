@@ -6,6 +6,9 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "rolt_city")
+@NamedQueries({
+        @NamedQuery(name = "City.findByName", query = "SELECT c from City c WHERE c.name = :name"),
+})
 public class City implements Serializable {
     @Id
     @Column(name = "id")

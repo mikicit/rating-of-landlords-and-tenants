@@ -1,7 +1,6 @@
 package dev.mikita.rolt.rest;
 
 import dev.mikita.rolt.dto.contract.ResponsePublicContractDto;
-import dev.mikita.rolt.dto.landlord.ResponsePublicLandlordDto;
 import dev.mikita.rolt.dto.property.ResponsePublicPropertyDto;
 import dev.mikita.rolt.dto.tenant.RequestCreateTenantDto;
 import dev.mikita.rolt.dto.tenant.RequestUpdateTenantDto;
@@ -18,6 +17,9 @@ import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -27,7 +29,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.security.Principal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -58,19 +62,42 @@ public class TenantController {
     }
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<ResponsePublicTenantDto> getTenants() {
+    public ResponseEntity<Map<String, Object>> getTenants(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) ConsumerGender gender,
+            @RequestParam(required = false) Boolean inSearch) {
+
         ModelMapper modelMapper = new ModelMapper();
 
-        return tenantService.findAll().stream()
-                        .map(tenant -> modelMapper.map(tenant, ResponsePublicTenantDto.class))
-                        .collect(Collectors.toList());
+        // Filters
+        Map<String, Object> filters = new HashMap<>();
+        if (inSearch != null) filters.put("inSearch", inSearch);
+        if (gender != null) filters.put("gender", gender);
+        filters.put("status", ConsumerStatus.ACTIVE);
+
+        // Pagination and sorting
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Tenant> pageTenants = tenantService.findAll(pageable, filters);
+        List<Tenant> tenants = pageTenants.getContent();
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("tenants", tenants.stream()
+                .map(landlord -> modelMapper.map(landlord, ResponsePublicTenantDto.class))
+                .collect(Collectors.toList()));
+        response.put("currentPage", pageTenants.getNumber());
+        response.put("totalItems", pageTenants.getTotalElements());
+        response.put("totalPages", pageTenants.getTotalPages());
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponsePublicTenantDto getTenant(@PathVariable Integer id) {
         final Tenant tenant = tenantService.find(id);
-        if (tenant == null)
+        if (tenant == null || tenant.getStatus() != ConsumerStatus.ACTIVE) {
             throw NotFoundException.create("Tenant", id);
+        }
         return new ModelMapper().map(tenant, ResponsePublicTenantDto.class);
     }
 

@@ -1,13 +1,14 @@
 package dev.mikita.rolt.service;
 
 import dev.mikita.rolt.dao.PropertyDao;
-import dev.mikita.rolt.entity.Landlord;
 import dev.mikita.rolt.entity.Property;
 import dev.mikita.rolt.entity.PublicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @Service
@@ -20,27 +21,17 @@ public class PropertyService {
     }
 
     @Transactional(readOnly = true)
-    public List<Property> findAll() {
-        return propertyDao.findAll();
-    }
-
-    @Transactional(readOnly = true)
-    public List<Property> findAll(Landlord landlord) {
-        return propertyDao.findByOwner(landlord);
-    }
-
-    @Transactional(readOnly = true)
-    public List<Property> findAllPublished(Landlord landlord) {
-        return propertyDao.findByOwnerPublished(landlord);
-    }
-
-    @Transactional(readOnly = true)
-    public List<Property> findAllAvailable() {
-        return propertyDao.findAllAvailable();
+    public Page<Property> findAll(Pageable pageable, Map<String, Object> filters) {
+        return propertyDao.findAll(pageable, filters);
     }
 
     @Transactional(readOnly = true)
     public Property find(Integer id) {
+        return propertyDao.find(id);
+    }
+
+    @Transactional(readOnly = true)
+    public Property findPublished(Integer id) {
         return propertyDao.find(id);
     }
 

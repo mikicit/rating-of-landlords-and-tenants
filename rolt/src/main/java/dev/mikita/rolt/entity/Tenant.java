@@ -7,6 +7,9 @@ import java.util.*;
 @Entity
 @Table(name = "rolt_tenant")
 @DiscriminatorValue("tenant")
+@NamedQueries({
+        @NamedQuery(name = "Tenant.findActive", query = "SELECT t from Tenant t WHERE t.status = dev.mikita.rolt.entity.ConsumerStatus.ACTIVE"),
+})
 public class Tenant extends Consumer {
     @Column(name = "in_search")
     private Boolean inSearch = false;

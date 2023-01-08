@@ -1,34 +1,92 @@
 package dev.mikita.rolt.dao;
 
-import dev.mikita.rolt.entity.ConsumerStatus;
-import dev.mikita.rolt.entity.Landlord;
+import dev.mikita.rolt.entity.*;
 import dev.mikita.rolt.exception.PersistenceException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.query.QueryUtils;
 import org.springframework.stereotype.Repository;
-
 import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.ParameterExpression;
-import javax.persistence.criteria.Root;
+import javax.persistence.criteria.*;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 @Repository
 public class LandlordDao extends BaseDao<Landlord> {
-    @Override
-    public List<Landlord> findAll() {
+    public Page<Landlord> findAll(Pageable pageable, Map<String, Object> filters) {
+        Objects.requireNonNull(pageable);
+        Objects.requireNonNull(filters);
+
         try {
-            CriteriaBuilder cb = em.getCriteriaBuilder();
-            CriteriaQuery<Landlord> cq = cb.createQuery(Landlord.class);
-            Root<Landlord> landlord = cq.from(Landlord.class);
-            ParameterExpression<Enum> s = cb.parameter(Enum.class);
+            List<Landlord> result = ((TypedQuery<Landlord>) createFindAllQuery(pageable, filters, false)).getResultList();
+            Long count = ((TypedQuery<Long>) createFindAllQuery(pageable, filters, true)).getSingleResult();
 
-            cq.select(landlord).where(cb.equal(landlord.get("status"), s));
-            TypedQuery<Landlord> query = em.createQuery(cq);
-            query.setParameter(s, ConsumerStatus.ACTIVE);
-
-            return query.getResultList();
+            return new PageImpl<>(result, pageable, count);
         } catch (RuntimeException e) {
             throw new PersistenceException(e);
         }
+    }
+
+    private TypedQuery<?> createFindAllQuery(Pageable pageable, Map<String, Object> filters, boolean count) {
+        Objects.requireNonNull(pageable);
+        Objects.requireNonNull(filters);
+
+        // Main Query
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaQuery cq;
+        if (count) {
+            cq = cb.createQuery(Long.class);
+        } else {
+            cq = cb.createQuery(Landlord.class);
+        }
+        Root<Landlord> landlord = cq.from(Landlord.class);
+
+        // Filters
+        List<Predicate> predicates = new ArrayList<>();
+
+        ParameterExpression<Enum> status = null;
+        if (filters.containsKey("status")) {
+            status = cb.parameter(Enum.class);
+            predicates.add(cb.equal(landlord.get("status"), status));
+        }
+
+        ParameterExpression<Enum> gender = null;
+        if (filters.containsKey("gender")) {
+            gender = cb.parameter(Enum.class);
+            predicates.add(cb.equal(landlord.get("gender"), gender));
+        }
+
+        if (!predicates.isEmpty()) {
+            cq.where(cb.and(predicates.toArray(new Predicate[0])));
+        }
+
+
+        TypedQuery<?> query;
+
+        if (count) {
+            cq.select(cb.count(landlord));
+            query = em.createQuery(cq);
+        } else {
+            cq.orderBy(QueryUtils.toOrders(pageable.getSort(), landlord, cb));
+            cq.select(landlord);
+
+            query = em.createQuery(cq)
+                    .setMaxResults(pageable.getPageSize())
+                    .setFirstResult((int) pageable.getOffset());
+        }
+
+        // Setting up parameters
+        if (status != null) {
+            query.setParameter(status, ConsumerStatus.valueOf(String.valueOf(filters.get("status"))));
+        }
+
+        if (gender != null) {
+            query.setParameter(gender, ConsumerGender.valueOf(String.valueOf(filters.get("gender"))));
+        }
+
+        return query;
     }
 }

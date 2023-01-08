@@ -4,9 +4,12 @@ import dev.mikita.rolt.dao.ContractDao;
 import dev.mikita.rolt.entity.*;
 import dev.mikita.rolt.exception.IncorrectDateRangeException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class ContractService {
@@ -18,8 +21,8 @@ public class ContractService {
     }
 
     @Transactional(readOnly = true)
-    public List<Contract> findAll() {
-        return contractDao.findAll();
+    public Page<Contract> findAll(Pageable pageable, Map<String, Object> filters) {
+        return contractDao.findAll(pageable, filters);
     }
 
     @Transactional(readOnly = true)

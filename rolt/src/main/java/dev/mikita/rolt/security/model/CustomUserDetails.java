@@ -1,7 +1,5 @@
 package dev.mikita.rolt.security.model;
 
-import dev.mikita.rolt.entity.Consumer;
-import dev.mikita.rolt.entity.ConsumerStatus;
 import dev.mikita.rolt.entity.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

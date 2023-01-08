@@ -1,5 +1,6 @@
 package dev.mikita.rolt.rest;
 
+import dev.mikita.rolt.dto.contract.ResponsePublicContractDto;
 import dev.mikita.rolt.dto.landlord.RequestCreateLandlordDto;
 import dev.mikita.rolt.dto.landlord.RequestUpdateLandlordDto;
 import dev.mikita.rolt.dto.landlord.ResponsePublicLandlordDto;
@@ -16,6 +17,9 @@ import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -24,7 +28,9 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.security.Principal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -57,16 +63,39 @@ public class LandlordController {
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponsePublicLandlordDto getLandlord(@PathVariable Integer id) {
         final Landlord landlord = landlordService.find(id);
-        if (landlord == null)
+        if (landlord == null || landlord.getStatus() != ConsumerStatus.ACTIVE) {
             throw NotFoundException.create("Landlord", id);
+        }
         return new ModelMapper().map(landlord, ResponsePublicLandlordDto.class);
     }
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<ResponsePublicLandlordDto> getLandlords() {
-        return landlordService.findAll().stream()
-                .map(landlord -> new ModelMapper().map(landlord, ResponsePublicLandlordDto.class))
-                .collect(Collectors.toList());
+    public ResponseEntity<Map<String, Object>> getLandlords(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) ConsumerGender gender) {
+
+        ModelMapper modelMapper = new ModelMapper();
+
+        // Filters
+        Map<String, Object> filters = new HashMap<>();
+        if (gender != null) filters.put("gender", gender);
+        filters.put("status", ConsumerStatus.ACTIVE);
+
+        // Pagination and sorting
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Landlord> pageLandlords = landlordService.findAll(pageable, filters);
+        List<Landlord> landlords = pageLandlords.getContent();
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("landlords", landlords.stream()
+                .map(landlord -> modelMapper.map(landlord, ResponsePublicLandlordDto.class))
+                .collect(Collectors.toList()));
+        response.put("currentPage", pageLandlords.getNumber());
+        response.put("totalItems", pageLandlords.getTotalElements());
+        response.put("totalPages", pageLandlords.getTotalPages());
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
 //    @PreAuthorize("hasAnyRole('ROLE_LANDLORD', 'ROLE_MODERATOR', 'ROLE_ADMIN')")
@@ -83,7 +112,7 @@ public class LandlordController {
 //        }
 
         final Landlord original = landlordService.find(id);
-        if (original == null) {
+        if (original == null || original.getStatus() != ConsumerStatus.ACTIVE) {
             throw NotFoundException.create("Landlord", id);
         }
 
@@ -119,18 +148,18 @@ public class LandlordController {
         LOG.debug("Removed landlord {}.", toRemove);
     }
 
-    @GetMapping(value = "/{id}/properties", produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<ResponsePublicPropertyDto> getProperties(@PathVariable Integer id) {
-        ModelMapper modelMapper = new ModelMapper();
-
-        final Landlord landlord = landlordService.find(id);
-        if (landlord == null)
-            throw NotFoundException.create("Landlord", id);
-
-        return propertyService.findAllPublished(landlord).stream()
-                .map(property -> modelMapper.map(property, ResponsePublicPropertyDto.class))
-                .collect(Collectors.toList());
-    }
+//    @GetMapping(value = "/{id}/properties", produces = MediaType.APPLICATION_JSON_VALUE)
+//    public List<ResponsePublicPropertyDto> getProperties(@PathVariable Integer id) {
+//        ModelMapper modelMapper = new ModelMapper();
+//
+//        final Landlord landlord = landlordService.find(id);
+//        if (landlord == null)
+//            throw NotFoundException.create("Landlord", id);
+//
+//        return propertyService.findAllPublished(landlord).stream()
+//                .map(property -> modelMapper.map(property, ResponsePublicPropertyDto.class))
+//                .collect(Collectors.toList());
+//    }
 
 //    @PreAuthorize("hasAnyRole('ROLE_LANDLORD', 'ROLE_MODERATOR', 'ROLE_ADMIN')")
     @GetMapping(value = "/{id}/contracts", produces = MediaType.APPLICATION_JSON_VALUE)

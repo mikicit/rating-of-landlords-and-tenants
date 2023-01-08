@@ -4,6 +4,7 @@ import dev.mikita.rolt.dto.contract.RequestCreateContractDto;
 import dev.mikita.rolt.dto.contract.RequestUpdateContractDto;
 import dev.mikita.rolt.dto.contract.ResponsePublicContractDto;
 import dev.mikita.rolt.dto.property.RequestUpdatePropertyDto;
+import dev.mikita.rolt.dto.property.ResponsePublicPropertyDto;
 import dev.mikita.rolt.entity.*;
 import dev.mikita.rolt.exception.NotFoundException;
 import dev.mikita.rolt.exception.ValidationException;
@@ -15,6 +16,10 @@ import dev.mikita.rolt.service.TenantService;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +29,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.http.MediaType;
 import javax.validation.Valid;
 import java.security.Principal;
+import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -46,11 +54,35 @@ public class ContractController {
 
 //    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<ResponsePublicContractDto> getContracts() {
+    public ResponseEntity<Map<String, Object>> getContracts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate) {
 
-        return contractService.findAll().stream()
-                .map(contract -> new ModelMapper().map(contract, ResponsePublicContractDto.class))
-                .collect(Collectors.toList());
+        ModelMapper modelMapper = new ModelMapper();
+
+        // Filters
+        Map<String, Object> filters = new HashMap<>();
+        if (fromDate != null) filters.put("fromDate", fromDate);
+        if (toDate != null) filters.put("toDate", toDate);
+
+        // Pagination and sorting
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Contract> pageContracts = contractService.findAll(pageable, filters);
+        List<Contract> contracts = pageContracts.getContent();
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("contracts", contracts.stream()
+                .map(contract -> modelMapper.map(contract, ResponsePublicContractDto.class))
+                .collect(Collectors.toList()));
+        response.put("currentPage", pageContracts.getNumber());
+        response.put("totalItems", pageContracts.getTotalElements());
+        response.put("totalPages", pageContracts.getTotalPages());
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
 //    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR', 'ROLE_TENANT', 'ROLE_MODERATOR')")

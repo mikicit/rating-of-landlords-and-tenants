@@ -3,9 +3,10 @@ package dev.mikita.rolt.service;
 import dev.mikita.rolt.dao.CityDao;
 import dev.mikita.rolt.entity.City;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 
 @Service
@@ -18,8 +19,8 @@ public class CityService {
     }
 
     @Transactional(readOnly = true)
-    public List<City> findAll() {
-        return cityDao.findAll();
+    public Page<City> findAll(Pageable pageable, String name) {
+        return cityDao.findAll(pageable, name);
     }
 
     @Transactional(readOnly = true)
