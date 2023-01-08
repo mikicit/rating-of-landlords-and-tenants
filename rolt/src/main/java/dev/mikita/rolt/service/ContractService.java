@@ -26,16 +26,6 @@ public class ContractService {
     }
 
     @Transactional(readOnly = true)
-    public List<Contract> findByProperty(Property property) {
-        return contractDao.findByProperty(property);
-    }
-
-    @Transactional(readOnly = true)
-    public List<Contract> findByUser(User user) {
-        return contractDao.findByUser(user);
-    }
-
-    @Transactional(readOnly = true)
     public Contract find(Integer id) {
         return contractDao.find(id);
     }

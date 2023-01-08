@@ -121,7 +121,7 @@ public class PropertyController {
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateProperty(@PathVariable Integer id, @RequestBody @Valid RequestUpdatePropertyDto propertyDto) {
-        final Property original = propertyService.findPublished(id);
+        final Property original = propertyService.find(id);
         if (original == null) {
             throw NotFoundException.create("Property", id);
         }

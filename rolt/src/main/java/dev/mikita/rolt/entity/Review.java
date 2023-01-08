@@ -11,10 +11,6 @@ import java.util.Objects;
         uniqueConstraints = {
                 @UniqueConstraint(name="unique_author_contract", columnNames = {"author_id", "contract_id"})
 })
-@NamedQueries({
-        @NamedQuery(name = "Review.findByAuthor", query = "SELECT r from Review r WHERE r.author = :user"),
-        @NamedQuery(name = "Review.findByReviewed", query = "SELECT r from Review r WHERE r.author <> :user AND (r.contract.tenant = :user OR r.contract.property.owner = :user)")
-})
 public class Review implements Serializable {
     @Id
     @Column(name = "id")

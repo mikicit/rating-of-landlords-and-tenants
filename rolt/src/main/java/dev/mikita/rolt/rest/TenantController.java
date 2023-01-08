@@ -2,6 +2,7 @@ package dev.mikita.rolt.rest;
 
 import dev.mikita.rolt.dto.contract.ResponsePublicContractDto;
 import dev.mikita.rolt.dto.property.ResponsePublicPropertyDto;
+import dev.mikita.rolt.dto.review.ResponsePublicReviewDto;
 import dev.mikita.rolt.dto.tenant.RequestCreateTenantDto;
 import dev.mikita.rolt.dto.tenant.RequestUpdateTenantDto;
 import dev.mikita.rolt.dto.tenant.ResponsePublicTenantDto;
@@ -12,6 +13,7 @@ import dev.mikita.rolt.rest.util.RestUtils;
 import dev.mikita.rolt.security.model.CustomUserDetails;
 import dev.mikita.rolt.service.ContractService;
 import dev.mikita.rolt.service.PropertyService;
+import dev.mikita.rolt.service.ReviewService;
 import dev.mikita.rolt.service.TenantService;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
@@ -20,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -29,6 +32,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.security.Principal;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,14 +46,17 @@ public class TenantController {
     private final TenantService tenantService;
     private final PropertyService propertyService;
     private final ContractService contractService;
+    private final ReviewService reviewService;
 
     @Autowired
     public TenantController(TenantService tenantService,
                             PropertyService propertyService,
-                            ContractService contractService) {
+                            ContractService contractService,
+                            ReviewService reviewService) {
         this.tenantService = tenantService;
         this.propertyService = propertyService;
         this.contractService = contractService;
+        this.reviewService = reviewService;
     }
 
 //    @PreAuthorize("hasAnyRole('ROLE_LANDLORD', 'ROLE_GUEST', 'ROLE_TENANT', 'ROLE_ADMIN', 'ROLE_MODERATOR')")
@@ -213,27 +220,5 @@ public class TenantController {
         }
 
         tenantService.removeFavorite(property, tenant);
-    }
-
-//    @PreAuthorize("hasAnyRole('ROLE_LANDLORD', 'ROLE_MODERATOR', 'ROLE_ADMIN')")
-    @GetMapping(value = "/{id}/contracts", produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<ResponsePublicContractDto> getContracts(Principal principal, @PathVariable Integer id) {
-//        final CustomUserDetails userDetails = (CustomUserDetails) principal;
-//        final User user = userDetails.getUser();
-//
-//        if ((user.getRole() != Role.ADMIN || user.getRole() != Role.MODERATOR)
-//                && !user.getId().equals(id)) {
-//            throw new AccessDeniedException("Cannot view another tenant's contracts.");
-//        }
-
-        ModelMapper modelMapper = new ModelMapper();
-
-        final Tenant tenant = tenantService.find(id);
-        if (tenant == null)
-            throw NotFoundException.create("Tenant", id);
-
-        return contractService.findByUser(tenant).stream()
-                .map(contract -> modelMapper.map(contract, ResponsePublicContractDto.class))
-                .collect(Collectors.toList());
     }
 }

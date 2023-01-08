@@ -5,6 +5,7 @@ import dev.mikita.rolt.dto.landlord.RequestCreateLandlordDto;
 import dev.mikita.rolt.dto.landlord.RequestUpdateLandlordDto;
 import dev.mikita.rolt.dto.landlord.ResponsePublicLandlordDto;
 import dev.mikita.rolt.dto.property.ResponsePublicPropertyDto;
+import dev.mikita.rolt.dto.review.ResponsePublicReviewDto;
 import dev.mikita.rolt.entity.*;
 import dev.mikita.rolt.exception.NotFoundException;
 import dev.mikita.rolt.exception.ValidationException;
@@ -13,6 +14,7 @@ import dev.mikita.rolt.security.model.CustomUserDetails;
 import dev.mikita.rolt.service.ContractService;
 import dev.mikita.rolt.service.LandlordService;
 import dev.mikita.rolt.service.PropertyService;
+import dev.mikita.rolt.service.ReviewService;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,14 +22,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import javax.validation.Valid;
 import java.security.Principal;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,14 +44,17 @@ public class LandlordController {
     private final LandlordService landlordService;
     private final PropertyService propertyService;
     private final ContractService contractService;
+    private final ReviewService reviewService;
 
     @Autowired
     public LandlordController(LandlordService landlordService,
                               PropertyService propertyService,
-                              ContractService contractService) {
+                              ContractService contractService,
+                              ReviewService reviewService) {
         this.landlordService = landlordService;
         this.propertyService = propertyService;
         this.contractService = contractService;
+        this.reviewService = reviewService;
     }
 
 //    @PreAuthorize("hasAnyRole('ROLE_GUEST', 'ROLE_ADMIN', 'ROLE_MODERATOR')")
@@ -148,35 +154,46 @@ public class LandlordController {
         LOG.debug("Removed landlord {}.", toRemove);
     }
 
-//    @GetMapping(value = "/{id}/properties", produces = MediaType.APPLICATION_JSON_VALUE)
-//    public List<ResponsePublicPropertyDto> getProperties(@PathVariable Integer id) {
-//        ModelMapper modelMapper = new ModelMapper();
-//
-//        final Landlord landlord = landlordService.find(id);
-//        if (landlord == null)
-//            throw NotFoundException.create("Landlord", id);
-//
-//        return propertyService.findAllPublished(landlord).stream()
-//                .map(property -> modelMapper.map(property, ResponsePublicPropertyDto.class))
-//                .collect(Collectors.toList());
-//    }
-
-//    @PreAuthorize("hasAnyRole('ROLE_LANDLORD', 'ROLE_MODERATOR', 'ROLE_ADMIN')")
-    @GetMapping(value = "/{id}/contracts", produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<Contract> getContracts(Principal principal, @PathVariable Integer id) {
-//        final CustomUserDetails userDetails = (CustomUserDetails) principal;
-//        final User user = userDetails.getUser();
-//
-//        if ((user.getRole() != Role.ADMIN
-//                || user.getRole() != Role.MODERATOR)
-//                && !user.getId().equals(id)) {
-//            throw new AccessDeniedException("Cannot view another landlord's contracts.");
-//        }
+    @GetMapping(value = "/{id}/properties", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Map<String, Object>> getProperties(
+            @PathVariable Integer id,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) Integer cityId,
+            @RequestParam(required = false) PropertyType propertyType,
+            @RequestParam(required = false) Integer minSquare,
+            @RequestParam(required = false) Integer maxSquare,
+            @RequestParam(required = false) Boolean isAvailable) {
 
         final Landlord landlord = landlordService.find(id);
         if (landlord == null)
             throw NotFoundException.create("Landlord", id);
 
-        return contractService.findByUser(landlord);
+        ModelMapper modelMapper = new ModelMapper();
+
+        // Filters
+        Map<String, Object> filters = new HashMap<>();
+        if (cityId != null) filters.put("cityId", cityId);
+        if (propertyType != null) filters.put("propertyType", propertyType);
+        if (minSquare != null) filters.put("minSquare", minSquare);
+        if (maxSquare != null) filters.put("maxSquare", maxSquare);
+        if (isAvailable != null) filters.put("isAvailable", isAvailable);
+        filters.put("status", PublicationStatus.PUBLISHED);
+        filters.put("ownerId", landlord.getId());
+
+        // Pagination and sorting
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Property> pageProperties = propertyService.findAll(pageable, filters);
+        List<Property> properties = pageProperties.getContent();
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("properties", properties.stream()
+                .map(property -> modelMapper.map(property, ResponsePublicPropertyDto.class))
+                .collect(Collectors.toList()));
+        response.put("currentPage", pageProperties.getNumber());
+        response.put("totalItems", pageProperties.getTotalElements());
+        response.put("totalPages", pageProperties.getTotalPages());
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

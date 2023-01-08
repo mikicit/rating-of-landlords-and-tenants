@@ -7,9 +7,6 @@ import java.util.*;
 @Entity
 @Table(name = "rolt_landlord")
 @DiscriminatorValue("landlord")
-@NamedQueries({
-        @NamedQuery(name = "Landlord.findActive", query = "SELECT l from Landlord l WHERE l.status = dev.mikita.rolt.entity.ConsumerStatus.ACTIVE"),
-})
 public class Landlord extends Consumer {
     @JsonIgnore
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)

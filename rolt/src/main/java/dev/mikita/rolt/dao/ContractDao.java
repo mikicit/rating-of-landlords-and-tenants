@@ -30,26 +30,6 @@ public class ContractDao extends BaseDao<Contract> {
         }
     }
 
-    public List<Contract> findByProperty(Property property) {
-        Objects.requireNonNull(property);
-        try {
-            return em.createNamedQuery("Contract.findByProperty", Contract.class).setParameter("property", property)
-                    .getResultList();
-        } catch (RuntimeException e) {
-            throw new PersistenceException(e);
-        }
-    }
-
-    public List<Contract> findByUser(User user) {
-        Objects.requireNonNull(user);
-        try {
-            return em.createNamedQuery("Contract.findByUser", Contract.class).setParameter("user", user)
-                    .getResultList();
-        } catch (RuntimeException e) {
-            throw new PersistenceException(e);
-        }
-    }
-
     public List<Contract> findIntersectionsByDateRange(Property property, LocalDate start, LocalDate end) {
         Objects.requireNonNull(property);
         Objects.requireNonNull(start);
@@ -81,6 +61,18 @@ public class ContractDao extends BaseDao<Contract> {
 
         // Filters
         List<Predicate> predicates = new ArrayList<>();
+
+        ParameterExpression<Landlord> landlord = null;
+        if (filters.containsKey("landlordId")) {
+            landlord = cb.parameter(Landlord.class);
+            predicates.add(cb.equal(contract.get("property").get("owner"), landlord));
+        }
+
+        ParameterExpression<Tenant> tenant = null;
+        if (filters.containsKey("tenantId")) {
+            tenant = cb.parameter(Tenant.class);
+            predicates.add(cb.equal(contract.get("tenant"), tenant));
+        }
 
         ParameterExpression<Property> property = null;
         if (filters.containsKey("propertyId")) {
@@ -119,6 +111,14 @@ public class ContractDao extends BaseDao<Contract> {
         }
 
         // Setting up parameters
+        if (landlord != null) {
+            query.setParameter(landlord, em.getReference(Landlord.class, filters.get("landlordId")));
+        }
+
+        if (tenant != null) {
+            query.setParameter(tenant, em.getReference(Tenant.class, filters.get("tenantId")));
+        }
+
         if (property != null) {
             query.setParameter(property, em.getReference(Property.class, filters.get("propertyId")));
         }

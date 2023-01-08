@@ -4,9 +4,11 @@ import dev.mikita.rolt.dao.ReviewDao;
 import dev.mikita.rolt.entity.PublicationStatus;
 import dev.mikita.rolt.entity.Review;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @Service
@@ -19,8 +21,8 @@ public class ReviewService {
     }
 
     @Transactional(readOnly = true)
-    public List<Review> findAll() {
-        return reviewDao.findAll();
+    public Page<Review> findAll(Pageable pageable, Map<String, Object> filters) {
+        return reviewDao.findAll(pageable, filters);
     }
 
     @Transactional(readOnly = true)

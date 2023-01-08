@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 @Service
 public class TenantService {
@@ -62,9 +63,9 @@ public class TenantService {
     }
 
     @Transactional
-    public List<Property> getFavorites(Tenant user) {
+    public Set<Property> getFavorites(Tenant user) {
         Objects.requireNonNull(user);
-        return propertyDao.findFavorites(user);
+        return user.getFavorites();
     }
 
     @Transactional

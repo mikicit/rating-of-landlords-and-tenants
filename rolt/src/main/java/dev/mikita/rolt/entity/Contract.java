@@ -9,8 +9,6 @@ import java.util.Objects;
 @Entity
 @Table(name = "rolt_contract")
 @NamedQueries({
-        @NamedQuery(name = "Contract.findByProperty", query = "SELECT c from Contract c WHERE c.property = :property"),
-        @NamedQuery(name = "Contract.findByUser", query = "SELECT c from Contract c WHERE c.property.owner = :user OR c.tenant = :user"),
         @NamedQuery(name = "Contract.findIntersectionsByDateRange", query = "SELECT c from Contract c WHERE c.property = :property AND (:start <= c.endDate AND c.startDate <= :end)")
 })
 public class Contract {

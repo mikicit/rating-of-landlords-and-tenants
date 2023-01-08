@@ -30,17 +30,6 @@ public class PropertyDao extends BaseDao<Property> {
         }
     }
 
-    public List<Property> findFavorites(Tenant tenant) {
-        Objects.requireNonNull(tenant);
-        try {
-            TypedQuery<Property> query = em.createQuery("SELECT p FROM Property p WHERE p.owner = :tenant AND p.status = dev.mikita.rolt.entity.PublicationStatus.PUBLISHED", Property.class);
-            query.setParameter("tenant", tenant);
-            return query.getResultList();
-        } catch (RuntimeException e) {
-            throw new PersistenceException(e);
-        }
-    }
-
     private TypedQuery<?> createFindAllQuery(Pageable pageable, Map<String, Object> filters, boolean count) {
         Objects.requireNonNull(pageable);
         Objects.requireNonNull(filters);
@@ -97,7 +86,7 @@ public class PropertyDao extends BaseDao<Property> {
         ParameterExpression<Landlord> owner = null;
         if (filters.containsKey("ownerId")) {
             owner = cb.parameter(Landlord.class);
-            predicates.add(cb.equal(property.get("ownerId"), owner));
+            predicates.add(cb.equal(property.get("owner"), owner));
         }
 
         if (!predicates.isEmpty()) {

@@ -3,8 +3,6 @@ package dev.mikita.rolt.rest;
 import dev.mikita.rolt.dto.contract.RequestCreateContractDto;
 import dev.mikita.rolt.dto.contract.RequestUpdateContractDto;
 import dev.mikita.rolt.dto.contract.ResponsePublicContractDto;
-import dev.mikita.rolt.dto.property.RequestUpdatePropertyDto;
-import dev.mikita.rolt.dto.property.ResponsePublicPropertyDto;
 import dev.mikita.rolt.entity.*;
 import dev.mikita.rolt.exception.NotFoundException;
 import dev.mikita.rolt.exception.ValidationException;

@@ -30,11 +30,6 @@ public class PropertyService {
         return propertyDao.find(id);
     }
 
-    @Transactional(readOnly = true)
-    public Property findPublished(Integer id) {
-        return propertyDao.find(id);
-    }
-
     @Transactional
     public void persist(Property property) {
         propertyDao.persist(property);
