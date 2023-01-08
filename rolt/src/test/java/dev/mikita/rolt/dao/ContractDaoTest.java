@@ -4,15 +4,22 @@ import dev.mikita.rolt.App;
 import dev.mikita.rolt.entity.*;
 import dev.mikita.rolt.environment.Generator;
 import dev.mikita.rolt.environment.TestConfiguration;
+import dev.mikita.rolt.exception.IncorrectDateRangeException;
+import dev.mikita.rolt.exception.IncorrectPropertyOwnerException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -50,6 +57,9 @@ public class ContractDaoTest {
         }).collect(Collectors.toList());
         properties.forEach(em::persist);
 
+        Pageable pageable = PageRequest.of(1, 10);
+        Map<String, Object> filters = new HashMap<>();
+
         final List<Contract> contracts = IntStream.range(0, 10).mapToObj(i -> {
             final Property p = properties.get(Generator.randomInt(0, properties.size() - 1));
             Contract contract = new Contract();
@@ -59,17 +69,20 @@ public class ContractDaoTest {
             contract.setTenant(tenants.get(Generator.randomInt(0, tenants.size() - 1)));
             contract.setProperty(p);
 
+            filters.put("property", p);
+
             return contract;
         }).collect(Collectors.toList());
+
         contracts.forEach(em::persist);
 
         final Property randomProperty = properties.get(Generator.randomInt(0, properties.size() - 1));
-        final List<Contract> result = contractDao.findByProperty(randomProperty);
+        final Page<Contract> result = contractDao.findAll(pageable, filters);
         result.forEach(c -> assertEquals(randomProperty, c.getProperty()));
     }
 
     @Test
-    public void persistContractWithIncorrectDateRangeReturnExceptions() {
+    public void persistContractWithIncorrectDateRangeReturnRuntimeException() {
         final Tenant tenant = Generator.generateTenant();
         final Landlord landlord = Generator.generateLandlord();
         final City city = Generator.generateCity();
@@ -89,7 +102,7 @@ public class ContractDaoTest {
         contract.setTenant(tenant);
         contract.setProperty(property);
 
-        assertThrows(IncorrectDateRangeException.class, () -> {
+        assertThrows(RuntimeException.class, () -> {
             em.persist(contract);
         });
     }

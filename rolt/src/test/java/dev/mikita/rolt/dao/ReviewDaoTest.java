@@ -10,8 +10,14 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -43,6 +49,8 @@ public class ReviewDaoTest {
         contract.setTenant(author);
         em.persist(contract);
 
+        List<Review> reviews = new ArrayList<>();
+
         final Review reviewOne = Generator.generateReview();
         reviewOne.setContract(contract);
         reviewOne.setAuthor(author);
@@ -53,10 +61,17 @@ public class ReviewDaoTest {
         reviewTwo.setAuthor(notAuthor);
         reviewDao.persist(reviewTwo);
 
+        reviews.add(reviewOne);
+        reviews.add(reviewTwo);
+
         em.flush();
 
-        List<Review> result = reviewDao.findByAuthor(author);
-        assertEquals(1, result.size());
+        Pageable pageable = PageRequest.of(1, 10);
+        Map<String, Object> filters = new HashMap<>();
+        filters.put("authorId", author.getId());
+
+        Page<Review> result = reviewDao.findAll(pageable, filters);
+        assertEquals(reviews.stream().filter(r -> r.getAuthor() == author).count(), result.getTotalElements());
         result.forEach(r -> assertSame(r.getAuthor(), author));
     }
 }

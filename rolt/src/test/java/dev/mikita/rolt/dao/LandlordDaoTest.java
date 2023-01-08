@@ -10,10 +10,16 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
@@ -37,8 +43,13 @@ public class LandlordDaoTest {
 
         landlords.forEach(em::persist);
 
-        final List<Landlord> result = landlordDao.findAll();
-        assertEquals(landlords.stream().filter(t -> t.getStatus() == ConsumerStatus.ACTIVE).count(), result.size());
+        Pageable pageable = PageRequest.of(1, 10);
+        Map<String, Object> filters = new HashMap<>();
+        filters.put("status", ConsumerStatus.ACTIVE);
+
+        final Page<Landlord> result = landlordDao.findAll(pageable, filters);
+        assertEquals(landlords.stream().filter(t -> t.getStatus() == ConsumerStatus.ACTIVE).count(), result.getTotalElements());
+//        assertEquals(landlords.stream().filter(t -> t.getStatus() == ConsumerStatus.ACTIVE).count(), result.size());
         result.forEach(t -> assertSame(t.getStatus(), ConsumerStatus.ACTIVE));
     }
 

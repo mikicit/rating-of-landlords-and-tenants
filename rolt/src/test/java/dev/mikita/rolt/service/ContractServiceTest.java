@@ -2,6 +2,8 @@ package dev.mikita.rolt.service;
 
 import dev.mikita.rolt.entity.*;
 import dev.mikita.rolt.environment.Generator;
+import dev.mikita.rolt.exception.IncorrectDateRangeException;
+import dev.mikita.rolt.exception.ValidationException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -23,7 +25,7 @@ public class ContractServiceTest {
     private ContractService contractService;
 
     @Test
-    public void persistWithIntersectedDatesThrowsException() {
+    public void persistWithIntersectedDatesThrowsValidationException() {
         final Tenant tenant = Generator.generateTenant();
         em.persist(tenant);
         final Landlord landlord = Generator.generateLandlord();
@@ -48,7 +50,7 @@ public class ContractServiceTest {
         newContract.setProperty(property);
         newContract.setTenant(tenant);
 
-        assertThrows(IncorrectDateRangeException.class, () -> {
+        assertThrows(ValidationException.class, () -> {
             contractService.persist(newContract);
         });
     }
