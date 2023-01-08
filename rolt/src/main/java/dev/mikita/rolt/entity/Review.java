@@ -1,6 +1,5 @@
 package dev.mikita.rolt.entity;
 
-import dev.mikita.rolt.exception.IncorrectConsumerException;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -10,6 +9,9 @@ import java.util.Objects;
 @Table(name = "rolt_review",
         uniqueConstraints = {
                 @UniqueConstraint(name="unique_author_contract", columnNames = {"author_id", "contract_id"})
+})
+@NamedQueries({
+        @NamedQuery(name = "Review.findByContractAndAuthor", query = "SELECT r from Review r WHERE r.contract = :contract AND r.author = :author")
 })
 public class Review implements Serializable {
     @Id
@@ -84,7 +86,7 @@ public class Review implements Serializable {
         Objects.requireNonNull(updatedOn);
 
         if (updatedOn.isBefore(createdOn)) {
-            throw new IllegalArgumentException("The update date must be after the creation date.");
+            throw new RuntimeException("The update date must be after the creation date.");
         }
 
         this.updatedOn = updatedOn;
@@ -116,7 +118,7 @@ public class Review implements Serializable {
         Objects.requireNonNull(rating);
 
         if (rating < 1 || rating > 5) {
-            throw new IllegalArgumentException("The rating value should be between 1 and 5.");
+            throw new RuntimeException("The rating value should be between 1 and 5.");
         }
 
         this.rating = rating;
@@ -125,7 +127,7 @@ public class Review implements Serializable {
     @PrePersist
     public void prePersist() {
         if (!author.equals(contract.getTenant()) && !author.equals(contract.getProperty().getOwner())) {
-            throw new IncorrectConsumerException("The user has no right to leave feedback for this contract");
+            throw new RuntimeException("The user has no right to leave feedback for this contract");
         }
     }
 

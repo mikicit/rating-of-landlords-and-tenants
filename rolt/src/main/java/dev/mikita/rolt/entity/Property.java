@@ -1,5 +1,6 @@
 package dev.mikita.rolt.entity;
 
+import dev.mikita.rolt.exception.PersistenceException;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -75,7 +76,7 @@ public class Property implements Serializable {
         Objects.requireNonNull(updatedOn);
 
         if (updatedOn.isBefore(createdOn)) {
-            throw new IllegalArgumentException("The date of the last login must be later than the creation date.");
+            throw new RuntimeException("The date of the last login must be later than the creation date.");
         }
 
         this.updatedOn = updatedOn;

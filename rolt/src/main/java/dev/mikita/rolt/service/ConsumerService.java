@@ -28,6 +28,11 @@ public class ConsumerService {
         return consumerDao.find(id);
     }
 
+    @Transactional(readOnly = true)
+    public Double getRating(Consumer consumer) {
+        return consumerDao.getRating(consumer);
+    }
+
     @Transactional
     public void persist(Consumer city) {
         consumerDao.persist(city);

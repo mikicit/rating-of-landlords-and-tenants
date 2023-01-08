@@ -132,4 +132,13 @@ public class ConsumerController {
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
+    @GetMapping(value = "/{id}/rating", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Double> getContracts(@PathVariable Integer id) {
+        final Consumer consumer = consumerService.find(id);
+        if (consumer == null)
+            throw NotFoundException.create("Consumer", id);
+
+        return new ResponseEntity<>(consumerService.getRating(consumer), HttpStatus.OK);
+    }
 }

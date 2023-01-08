@@ -1,6 +1,5 @@
 package dev.mikita.rolt.entity;
 
-import dev.mikita.rolt.exception.IncorrectDateRangeException;
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -90,11 +89,11 @@ public class Contract {
     @PrePersist
     public void prePersist() {
         if (endDate.isBefore(startDate)) {
-            throw new IncorrectDateRangeException("The end date of the contract cannot be earlier than the start date of the contract.");
+            throw new RuntimeException("The end date of the contract cannot be earlier than the start date of the contract.");
         }
 
         if (endDate.isEqual(startDate)) {
-            throw new IncorrectDateRangeException("The start and end dates of a contract cannot be the same.");
+            throw new RuntimeException("The start and end dates of a contract cannot be the same.");
         }
     }
 

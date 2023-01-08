@@ -3,11 +3,13 @@ package dev.mikita.rolt.service;
 import dev.mikita.rolt.dao.ReviewDao;
 import dev.mikita.rolt.entity.PublicationStatus;
 import dev.mikita.rolt.entity.Review;
+import dev.mikita.rolt.exception.ValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -32,6 +34,12 @@ public class ReviewService {
 
     @Transactional
     public void persist(Review review) {
+        List<Review> reviews = reviewDao.findByContractAndAuthor(review.getContract(), review.getAuthor());
+
+        if (!reviews.isEmpty()) {
+            throw new ValidationException("You have already left feedback for this contract.");
+        }
+
         reviewDao.persist(review);
     }
 

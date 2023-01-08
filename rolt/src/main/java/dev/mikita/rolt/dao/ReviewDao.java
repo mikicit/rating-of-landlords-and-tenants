@@ -7,7 +7,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.query.QueryUtils;
 import org.springframework.stereotype.Repository;
-
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
 import java.util.ArrayList;
@@ -26,6 +25,20 @@ public class ReviewDao extends BaseDao<Review> {
             Long count = ((TypedQuery<Long>) createFindAllQuery(pageable, filters, true)).getSingleResult();
 
             return new PageImpl<>(result, pageable, count);
+        } catch (RuntimeException e) {
+            throw new PersistenceException(e);
+        }
+    }
+
+    public List<Review> findByContractAndAuthor(Contract contract, Consumer author) {
+        Objects.requireNonNull(contract);
+        Objects.requireNonNull(author);
+
+        try {
+            return em.createNamedQuery("Review.findByContractAndAuthor", Review.class)
+                    .setParameter("contract", contract)
+                    .setParameter("author", author)
+                    .getResultList();
         } catch (RuntimeException e) {
             throw new PersistenceException(e);
         }

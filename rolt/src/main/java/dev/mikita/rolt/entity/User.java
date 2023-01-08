@@ -77,7 +77,7 @@ public abstract class User implements Serializable {
         Objects.requireNonNull(lastLogin);
 
         if (lastLogin.isBefore(createdOn)) {
-            throw new IllegalArgumentException("The date of the last login must be later than the creation date.");
+            throw new RuntimeException("The date of the last login must be later than the creation date.");
         }
 
         this.lastLogin = lastLogin;
