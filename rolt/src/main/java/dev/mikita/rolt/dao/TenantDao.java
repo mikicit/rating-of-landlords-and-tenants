@@ -3,6 +3,7 @@ package dev.mikita.rolt.dao;
 import dev.mikita.rolt.entity.ConsumerGender;
 import dev.mikita.rolt.entity.ConsumerStatus;
 import dev.mikita.rolt.entity.Tenant;
+import dev.mikita.rolt.entity.Tenant_;
 import dev.mikita.rolt.exception.PersistenceException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -16,8 +17,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * The type Tenant dao.
+ */
 @Repository
 public class TenantDao extends BaseDao<Tenant> {
+    /**
+     * Find all page.
+     *
+     * @param pageable the pageable
+     * @param filters  the filters
+     * @return the page
+     */
     public Page<Tenant> findAll(Pageable pageable, Map<String, Object> filters) {
         Objects.requireNonNull(pageable);
         Objects.requireNonNull(filters);
@@ -32,6 +43,11 @@ public class TenantDao extends BaseDao<Tenant> {
         }
     }
 
+    /**
+     * Find all in search list.
+     *
+     * @return the list
+     */
     public List<Tenant> findAllInSearch() {
         try {
             return em.createQuery("SELECT t FROM Tenant t WHERE t.status = dev.mikita.rolt.entity.ConsumerStatus.ACTIVE AND t.inSearch = true", Tenant.class).getResultList();
@@ -39,6 +55,14 @@ public class TenantDao extends BaseDao<Tenant> {
             throw new PersistenceException(e);
         }
     }
+
+    /**
+     * Creates a findAll query.
+     * @param pageable pageable
+     * @param filters filters
+     * @param count count
+     * @return query
+     */
     private TypedQuery<?> createFindAllQuery(Pageable pageable, Map<String, Object> filters, boolean count) {
         Objects.requireNonNull(pageable);
         Objects.requireNonNull(filters);
@@ -59,19 +83,19 @@ public class TenantDao extends BaseDao<Tenant> {
         ParameterExpression<Boolean> inSearch = null;
         if (filters.containsKey("inSearch")) {
             inSearch = cb.parameter(Boolean.class);
-            predicates.add(cb.equal(tenant.get("inSearch"), inSearch));
+            predicates.add(cb.equal(tenant.get(Tenant_.inSearch), inSearch));
         }
 
         ParameterExpression<Enum> status = null;
         if (filters.containsKey("status")) {
             status = cb.parameter(Enum.class);
-            predicates.add(cb.equal(tenant.get("status"), status));
+            predicates.add(cb.equal(tenant.get(Tenant_.status), status));
         }
 
         ParameterExpression<Enum> gender = null;
         if (filters.containsKey("gender")) {
             gender = cb.parameter(Enum.class);
-            predicates.add(cb.equal(tenant.get("gender"), gender));
+            predicates.add(cb.equal(tenant.get(Tenant_.gender), gender));
         }
 
         if (!predicates.isEmpty()) {

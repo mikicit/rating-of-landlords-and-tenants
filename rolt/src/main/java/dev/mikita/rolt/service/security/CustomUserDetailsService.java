@@ -9,15 +9,29 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+/**
+ * The type Custom user details service.
+ */
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
     private final UserDao userDao;
 
+    /**
+     * Instantiates a new Custom user details service.
+     *
+     * @param userDao the user dao
+     */
     @Autowired
     public CustomUserDetailsService(UserDao userDao) {
         this.userDao = userDao;
     }
 
+    /**
+     * Loads by username.
+     * @param email the email
+     * @return the user details
+     * @throws UsernameNotFoundException the exception
+     */
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         final User user = userDao.findByEmail(email);

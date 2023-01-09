@@ -6,6 +6,9 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+/**
+ * The type Request update review dto.
+ */
 @Data
 public class RequestUpdateReviewDto {
     @NotNull(message = "Specify the review id.")

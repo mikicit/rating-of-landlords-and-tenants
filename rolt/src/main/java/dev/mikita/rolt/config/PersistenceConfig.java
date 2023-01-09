@@ -13,11 +13,22 @@ import javax.sql.DataSource;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * The type Persistence config.
+ */
 @Configuration
 @PropertySource("classpath:eclipselink.properties")     // Contains additional, Eclipselink-specific configuration
 public class PersistenceConfig extends JpaBaseConfiguration {
     private final Environment environment;
 
+    /**
+     * Instantiates a new Persistence config.
+     *
+     * @param dataSource            the data source
+     * @param properties            the properties
+     * @param jtaTransactionManager the jta transaction manager
+     * @param environment           the environment
+     */
     protected PersistenceConfig(DataSource dataSource,
                                 JpaProperties properties,
                                 ObjectProvider<JtaTransactionManager> jtaTransactionManager,

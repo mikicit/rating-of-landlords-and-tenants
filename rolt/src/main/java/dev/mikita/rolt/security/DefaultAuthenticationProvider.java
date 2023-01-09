@@ -14,6 +14,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+/**
+ * The type Default authentication provider.
+ */
 @Service
 public class DefaultAuthenticationProvider implements AuthenticationProvider {
     private static final Logger LOG = LoggerFactory.getLogger(DefaultAuthenticationProvider.class);
@@ -21,12 +24,24 @@ public class DefaultAuthenticationProvider implements AuthenticationProvider {
     private final UserDetailsService userDetailsService;
     private final PasswordEncoder passwordEncoder;
 
+    /**
+     * Instantiates a new Default authentication provider.
+     *
+     * @param userDetailsService the user details service
+     * @param passwordEncoder    the password encoder
+     */
     @Autowired
     public DefaultAuthenticationProvider(UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
         this.userDetailsService = userDetailsService;
         this.passwordEncoder = passwordEncoder;
     }
 
+    /**
+     * Authenticates.
+     * @param authentication the authentication
+     * @return the authentication
+     * @throws AuthenticationException the exception
+     */
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         final String username = authentication.getPrincipal().toString();
@@ -44,6 +59,11 @@ public class DefaultAuthenticationProvider implements AuthenticationProvider {
         return SecurityUtils.setCurrentUser(userDetails);
     }
 
+    /**
+     * Checks if supported.
+     * @param aClass the class to check
+     * @return bool
+     */
     @Override
     public boolean supports(Class<?> aClass) {
         return UsernamePasswordAuthenticationToken.class.isAssignableFrom(aClass) ||

@@ -4,6 +4,9 @@ import dev.mikita.rolt.entity.PropertyType;
 import lombok.Data;
 import java.time.LocalDateTime;
 
+/**
+ * The type Response public property dto.
+ */
 @Data
 public class ResponsePublicPropertyDto {
     private Integer id;

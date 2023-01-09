@@ -4,6 +4,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
 
+/**
+ * The type Rest utils.
+ */
 public class RestUtils {
     /**
      * Creates HTTP headers object with a location header with the specified path appended to the current request URI.

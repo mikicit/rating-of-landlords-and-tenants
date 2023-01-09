@@ -2,7 +2,6 @@ package dev.mikita.rolt.service;
 
 import dev.mikita.rolt.entity.*;
 import dev.mikita.rolt.environment.Generator;
-import dev.mikita.rolt.exception.IncorrectDateRangeException;
 import dev.mikita.rolt.exception.ValidationException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

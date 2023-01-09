@@ -5,6 +5,9 @@ import javax.validation.constraints.Future;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 
+/**
+ * The type Request create contract dto.
+ */
 @Data
 public class RequestCreateContractDto {
     // TODO Cross field validation

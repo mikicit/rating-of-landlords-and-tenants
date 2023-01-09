@@ -4,6 +4,9 @@ import dev.mikita.rolt.entity.ConsumerGender;
 import lombok.Data;
 import java.time.LocalDateTime;
 
+/**
+ * The type Response public tenant dto.
+ */
 @Data
 public class ResponsePublicTenantDto {
     private Integer id;

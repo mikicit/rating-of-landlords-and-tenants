@@ -56,13 +56,13 @@
             <artifactId>org.eclipse.persistence.jpa</artifactId>
             <version>${org.eclipse.persistence.version}</version>
         </dependency>
-<!--        &lt;!&ndash; JPA metamodel for Criteria API &ndash;&gt;-->
-<!--        <dependency>-->
-<!--            <groupId>org.eclipse.persistence</groupId>-->
-<!--            <artifactId>org.eclipse.persistence.jpa.modelgen.processor</artifactId>-->
-<!--            <version>${org.eclipse.persistence.version}</version>-->
-<!--            <scope>runtime</scope>-->
-<!--        </dependency>-->
+        <!-- JPA metamodel for Criteria API -->
+        <dependency>
+            <groupId>org.eclipse.persistence</groupId>
+            <artifactId>org.eclipse.persistence.jpa.modelgen.processor</artifactId>
+            <version>${org.eclipse.persistence.version}</version>
+            <scope>runtime</scope>
+        </dependency>
 
         <!-- PostgreSQL driver -->
         <dependency>
@@ -118,35 +118,54 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
             <!-- Metamodel Processing -->
-<!--            <plugin>-->
-<!--                <groupId>org.bsc.maven</groupId>-->
-<!--                <artifactId>maven-processor-plugin</artifactId>-->
-<!--                <version>2.2.4</version>-->
-<!--                <executions>-->
-<!--                    <execution>-->
-<!--                        <id>eclipselink-jpa-metamodel</id>-->
-<!--                        <goals>-->
-<!--                            <goal>process</goal>-->
-<!--                        </goals>-->
-<!--                        <phase>generate-sources</phase>-->
-<!--                        <configuration>-->
-<!--                            <processors>-->
-<!--                                <processor>org.eclipse.persistence.internal.jpa.modelgen.CanonicalModelProcessor</processor>-->
-<!--                            </processors>-->
-<!--                            <compilerArguments>-Aeclipselink.persistencexml=${basedir}/src/main/resources/META-INF/persistence.xml</compilerArguments>-->
-<!--                            <outputDirectory>${project.build.directory}/generated-sources/meta-model</outputDirectory>-->
-<!--                        </configuration>-->
-<!--                    </execution>-->
-<!--                </executions>-->
-<!--                <dependencies>-->
-<!--                    <dependency>-->
-<!--                        <groupId>org.eclipse.persistence</groupId>-->
-<!--                        <artifactId>org.eclipse.persistence.jpa.modelgen.processor</artifactId>-->
-<!--                        <version>${org.eclipse.persistence.version}</version>-->
-<!--                        <scope>compile</scope>-->
-<!--                    </dependency>-->
-<!--                </dependencies>-->
-<!--            </plugin>-->
+            <plugin>
+                <groupId>org.bsc.maven</groupId>
+                <artifactId>maven-processor-plugin</artifactId>
+                <version>2.2.4</version>
+                <executions>
+                    <execution>
+                        <id>eclipselink-jpa-metamodel</id>
+                        <goals>
+                            <goal>process</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <processors>
+                                <processor>org.eclipse.persistence.internal.jpa.modelgen.CanonicalModelProcessor</processor>
+                            </processors>
+                            <compilerArguments>-Aeclipselink.persistencexml=${basedir}/src/main/resources/META-INF/persistence.xml</compilerArguments>
+                            <outputDirectory>${project.build.directory}/generated-sources/meta-model</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.eclipse.persistence</groupId>
+                        <artifactId>org.eclipse.persistence.jpa.modelgen.processor</artifactId>
+                        <version>${org.eclipse.persistence.version}</version>
+                        <scope>compile</scope>
+                    </dependency>
+                </dependencies>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                    <execution>
+                        <id>add-source</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>target/generated-sources/annotations</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <!-- Test code coverage -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

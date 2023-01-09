@@ -4,6 +4,9 @@ import dev.mikita.rolt.entity.PropertyType;
 import lombok.Data;
 import javax.validation.constraints.*;
 
+/**
+ * The type Request create property dto.
+ */
 @Data
 public class RequestCreatePropertyDto {
     @NotNull(message = "Specify the owner id.")

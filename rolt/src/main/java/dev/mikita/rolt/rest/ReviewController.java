@@ -1,6 +1,5 @@
 package dev.mikita.rolt.rest;
 
-import dev.mikita.rolt.dto.property.ResponsePublicPropertyDto;
 import dev.mikita.rolt.dto.review.RequestCreateReviewDto;
 import dev.mikita.rolt.dto.review.RequestUpdateReviewDto;
 import dev.mikita.rolt.dto.review.ResponsePublicReviewDto;
@@ -26,11 +25,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
+import java.security.Principal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * The type Review controller.
+ */
 @RestController
 @RequestMapping("/rest/v1/reviews")
 public class ReviewController {
@@ -40,6 +43,13 @@ public class ReviewController {
     private final ContractService contractService;
     private final ConsumerService consumerService;
 
+    /**
+     * Instantiates a new Review controller.
+     *
+     * @param reviewService   the review service
+     * @param contractService the contract service
+     * @param consumerService the consumer service
+     */
     @Autowired
     public ReviewController(ReviewService reviewService,
                             ContractService contractService,
@@ -49,6 +59,12 @@ public class ReviewController {
         this.consumerService = consumerService;
     }
 
+    /**
+     * Gets review.
+     *
+     * @param id the id
+     * @return the review
+     */
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponsePublicReviewDto getReview(@PathVariable Integer id) {
         final Review review = reviewService.find(id);
@@ -57,7 +73,18 @@ public class ReviewController {
         return new ModelMapper().map(review, ResponsePublicReviewDto.class);
     }
 
-//    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
+    /**
+     * Gets reviews.
+     *
+     * @param page       the page
+     * @param size       the size
+     * @param status     the status
+     * @param authorId   the author id
+     * @param reviewedId the reviewed id
+     * @param contractId the contract id
+     * @return the reviews
+     */
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map<String, Object>> getReviews(
             @RequestParam(defaultValue = "0") int page,
@@ -92,7 +119,13 @@ public class ReviewController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-//    @PreAuthorize("hasAnyRole('ROLE_LANDLORD', 'ROLE_TENANT')")
+    /**
+     * Add review response entity.
+     *
+     * @param reviewDto the review dto
+     * @return the response entity
+     */
+    @PreAuthorize("hasAnyRole('ROLE_LANDLORD', 'ROLE_TENANT', 'ROLE_ADMIN', 'ROLE_MODERATOR')")
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> addReview(@RequestBody @Valid RequestCreateReviewDto reviewDto) {
         final Contract contract = contractService.find(reviewDto.getContractId());
@@ -122,8 +155,16 @@ public class ReviewController {
         return new ResponseEntity<>(headers, HttpStatus.CREATED);
     }
 
+    /**
+     * Update review response entity.
+     *
+     * @param id        the id
+     * @param reviewDto the review dto
+     * @return the response entity
+     */
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
     public ResponseEntity<Void> updateReview(@PathVariable Integer id, @RequestBody @Valid RequestUpdateReviewDto reviewDto) {
         final Review original = reviewService.find(id);
         if (original == null) {
@@ -161,9 +202,15 @@ public class ReviewController {
         return new ResponseEntity<>(headers, HttpStatus.CREATED);
     }
 
+    /**
+     * Delete review.
+     *
+     * @param id the id
+     */
     @DeleteMapping(value = "/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteProperty(@PathVariable Integer id) {
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
+    public void deleteReview(@PathVariable Integer id) {
         final Review toRemove = reviewService.find(id);
         if (toRemove == null) {
             return;

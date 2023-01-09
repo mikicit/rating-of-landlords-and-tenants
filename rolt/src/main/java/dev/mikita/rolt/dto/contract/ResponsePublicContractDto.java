@@ -4,6 +4,9 @@ import lombok.Data;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+/**
+ * The type Response public contract dto.
+ */
 @Data
 public class ResponsePublicContractDto {
     private Integer id;

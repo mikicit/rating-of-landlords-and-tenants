@@ -4,6 +4,9 @@ import dev.mikita.rolt.entity.ConsumerGender;
 import lombok.Data;
 import javax.validation.constraints.*;
 
+/**
+ * The type Request update landlord dto.
+ */
 @Data
 public class RequestUpdateLandlordDto {
     @NotNull(message = "Specify the landlord id.")

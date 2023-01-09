@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * Base interface for data access objects.
  *
- * @param <T>
+ * @param <T> the type parameter
  */
 public interface GenericDao<T> {
 

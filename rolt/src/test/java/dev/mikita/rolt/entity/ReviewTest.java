@@ -10,11 +10,11 @@ public class ReviewTest {
     public void settingInvalidRainingThrowsException() {
         Review review = Generator.generateReview();
 
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(RuntimeException.class, () -> {
             review.setRating(0);
         });
 
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(RuntimeException.class, () -> {
             review.setRating(6);
         });
     }

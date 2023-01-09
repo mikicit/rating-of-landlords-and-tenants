@@ -17,12 +17,22 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+/**
+ * The type Tenant service.
+ */
 @Service
 public class TenantService {
     private final TenantDao tenantDao;
     private final UserDao userDao;
     private final PasswordEncoder passwordEncoder;
 
+    /**
+     * Instantiates a new Tenant service.
+     *
+     * @param tenantDao       the tenant dao
+     * @param passwordEncoder the password encoder
+     * @param userDao         the user dao
+     */
     @Autowired
     public TenantService(TenantDao tenantDao,
                          PasswordEncoder passwordEncoder,
@@ -32,20 +42,38 @@ public class TenantService {
         this.userDao = userDao;
     }
 
+    /**
+     * Find all page.
+     *
+     * @param pageable the pageable
+     * @param filters  the filters
+     * @return the page
+     */
     @Transactional(readOnly = true)
     public Page<Tenant> findAll(Pageable pageable, Map<String, Object> filters) {
         return tenantDao.findAll(pageable, filters);
     }
 
+    /**
+     * Find tenant.
+     *
+     * @param id the id
+     * @return the tenant
+     */
     @Transactional(readOnly = true)
     public Tenant find(Integer id) {
         return tenantDao.find(id);
     }
 
+    /**
+     * Persist.
+     *
+     * @param user the user
+     */
     @Transactional
     public void persist(Tenant user) {
         Objects.requireNonNull(user);
-        if (userDao.findByEmail(user.getEmail()) == null) {
+        if (userDao.findByEmail(user.getEmail()) != null) {
             throw new ValidationException("A user with this email already exists.");
         }
 
@@ -54,11 +82,21 @@ public class TenantService {
         tenantDao.persist(user);
     }
 
+    /**
+     * Update.
+     *
+     * @param user the user
+     */
     @Transactional
     public void update(Tenant user) {
         tenantDao.update(user);
     }
 
+    /**
+     * Remove.
+     *
+     * @param user the user
+     */
     @Transactional
     public void remove(Tenant user) {
         Objects.requireNonNull(user);
@@ -67,12 +105,24 @@ public class TenantService {
         tenantDao.update(user);
     }
 
+    /**
+     * Gets favorites.
+     *
+     * @param user the user
+     * @return the favorites
+     */
     @Transactional
     public Set<Property> getFavorites(Tenant user) {
         Objects.requireNonNull(user);
         return user.getFavorites();
     }
 
+    /**
+     * Add favorite.
+     *
+     * @param property the property
+     * @param user     the user
+     */
     @Transactional
     public void addFavorite(Property property, Tenant user) {
         Objects.requireNonNull(property);
@@ -81,6 +131,12 @@ public class TenantService {
         tenantDao.update(user);
     }
 
+    /**
+     * Remove favorite.
+     *
+     * @param property the property
+     * @param user     the user
+     */
     @Transactional
     public void removeFavorite(Property property, Tenant user) {
         Objects.requireNonNull(property);
@@ -89,6 +145,11 @@ public class TenantService {
         tenantDao.update(user);
     }
 
+    /**
+     * Block.
+     *
+     * @param user the user
+     */
     @Transactional
     public void block(Tenant user) {
         Objects.requireNonNull(user);
@@ -97,6 +158,11 @@ public class TenantService {
         tenantDao.update(user);
     }
 
+    /**
+     * Active.
+     *
+     * @param user the user
+     */
     @Transactional
     public void active(Tenant user) {
         Objects.requireNonNull(user);

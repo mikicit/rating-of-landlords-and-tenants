@@ -14,8 +14,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * The type Review dao.
+ */
 @Repository
 public class ReviewDao extends BaseDao<Review> {
+    /**
+     * Find all page.
+     *
+     * @param pageable the pageable
+     * @param filters  the filters
+     * @return the page
+     */
     public Page<Review> findAll(Pageable pageable, Map<String, Object> filters) {
         Objects.requireNonNull(pageable);
         Objects.requireNonNull(filters);
@@ -30,6 +40,13 @@ public class ReviewDao extends BaseDao<Review> {
         }
     }
 
+    /**
+     * Find by contract and author list.
+     *
+     * @param contract the contract
+     * @param author   the author
+     * @return the list
+     */
     public List<Review> findByContractAndAuthor(Contract contract, Consumer author) {
         Objects.requireNonNull(contract);
         Objects.requireNonNull(author);
@@ -44,6 +61,13 @@ public class ReviewDao extends BaseDao<Review> {
         }
     }
 
+    /**
+     * Creates a findAll query.
+     * @param pageable pageable
+     * @param filters filters
+     * @param count count
+     * @return query
+     */
     private TypedQuery<?> createFindAllQuery(Pageable pageable, Map<String, Object> filters, boolean count) {
         Objects.requireNonNull(pageable);
         Objects.requireNonNull(filters);
@@ -64,13 +88,13 @@ public class ReviewDao extends BaseDao<Review> {
         ParameterExpression<Enum> status = null;
         if (filters.containsKey("status")) {
             status = cb.parameter(Enum.class);
-            predicates.add(cb.equal(review.get("status"), status));
+            predicates.add(cb.equal(review.get(Review_.status), status));
         }
 
         ParameterExpression<Consumer> author = null;
         if (filters.containsKey("authorId")) {
             author = cb.parameter(Consumer.class);
-            predicates.add(cb.equal(review.get("author"), author));
+            predicates.add(cb.equal(review.get(Review_.author), author));
         }
 
         ParameterExpression<Consumer> reviewed = null;
@@ -78,9 +102,9 @@ public class ReviewDao extends BaseDao<Review> {
             reviewed = cb.parameter(Consumer.class);
 
             Predicate tenantOrOwner = cb.or(
-                    cb.equal(review.get("contract").get("tenant"), reviewed),
-                    cb.equal(review.get("contract").get("property").get("owner"), reviewed));
-            Predicate notEqualPredicate = cb.notEqual(review.get("author"), reviewed);
+                    cb.equal(review.get(Review_.contract).get(Contract_.tenant), reviewed),
+                    cb.equal(review.get(Review_.contract).get(Contract_.property).get(Property_.owner), reviewed));
+            Predicate notEqualPredicate = cb.notEqual(review.get(Review_.author), reviewed);
 
             predicates.add(tenantOrOwner);
             predicates.add(notEqualPredicate);
@@ -89,7 +113,7 @@ public class ReviewDao extends BaseDao<Review> {
         ParameterExpression<Contract> contract = null;
         if (filters.containsKey("contractId")) {
             contract = cb.parameter(Contract.class);
-            predicates.add(cb.equal(review.get("contract"), contract));
+            predicates.add(cb.equal(review.get(Review_.contract), contract));
         }
 
         if (!predicates.isEmpty()) {

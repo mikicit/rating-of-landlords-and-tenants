@@ -4,6 +4,9 @@ import dev.mikita.rolt.entity.ConsumerGender;
 import lombok.Data;
 import javax.validation.constraints.*;
 
+/**
+ * The type Request update tenant dto.
+ */
 @Data
 public class RequestUpdateTenantDto {
     @NotNull(message = "Specify the tenant id.")

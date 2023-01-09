@@ -6,6 +6,9 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+/**
+ * The type Request create review dto.
+ */
 @Data
 public class RequestCreateReviewDto {
     @NotNull(message = "Specify the contract id.")

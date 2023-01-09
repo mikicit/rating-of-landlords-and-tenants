@@ -2,6 +2,7 @@ package dev.mikita.rolt.rest;
 
 import dev.mikita.rolt.entity.*;
 import dev.mikita.rolt.exception.NotFoundException;
+import dev.mikita.rolt.exception.ValidationException;
 import dev.mikita.rolt.rest.util.RestUtils;
 import dev.mikita.rolt.service.CityService;
 import org.slf4j.Logger;
@@ -21,6 +22,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * The type City controller.
+ */
 @RestController
 @RequestMapping("/rest/v1/cities")
 public class CityController {
@@ -28,11 +32,24 @@ public class CityController {
 
     private final CityService cityService;
 
+    /**
+     * Instantiates a new City controller.
+     *
+     * @param cityService the city service
+     */
     @Autowired
     public CityController(CityService cityService) {
         this.cityService = cityService;
     }
 
+    /**
+     * Gets cities.
+     *
+     * @param page the page
+     * @param size the size
+     * @param name the name
+     * @return the cities
+     */
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map<String, Object>> getCities(
             @RequestParam(defaultValue = "0") int page,
@@ -53,7 +70,12 @@ public class CityController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_MODERATOR', 'ROLE_TENANT', 'ROLE_LANDLORD')")
+    /**
+     * Gets city.
+     *
+     * @param id the id
+     * @return the city
+     */
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public City getCity(@PathVariable Integer id) {
         final City city = cityService.find(id);
@@ -65,7 +87,13 @@ public class CityController {
         return city;
     }
 
-//    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
+    /**
+     * Create city response entity.
+     *
+     * @param city the city
+     * @return the response entity
+     */
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> createCity(@RequestBody City city) {
         cityService.persist(city);
@@ -73,7 +101,29 @@ public class CityController {
         return new ResponseEntity<>(headers, HttpStatus.CREATED);
     }
 
-//    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
+    /**
+     * Update city.
+     * @param id the id
+     * @param city the city
+     */
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public void updateCity(@PathVariable Integer id, @RequestBody City city) {
+        final City original = getCity(id);
+        if (!original.getId().equals(city.getId())) {
+            throw new ValidationException("City identifier in the data does not match the one in the request URL.");
+        }
+        cityService.update(city);
+        LOG.debug("Updated product {}.", city);
+    }
+
+    /**
+     * Delete city.
+     *
+     * @param id the id
+     */
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
     @DeleteMapping(value = "/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteCity(@PathVariable Integer id) {

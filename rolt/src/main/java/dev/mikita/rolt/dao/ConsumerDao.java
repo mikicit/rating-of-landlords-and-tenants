@@ -1,7 +1,6 @@
 package dev.mikita.rolt.dao;
 
-import dev.mikita.rolt.entity.Consumer;
-import dev.mikita.rolt.entity.Review;
+import dev.mikita.rolt.entity.*;
 import dev.mikita.rolt.exception.PersistenceException;
 import org.springframework.stereotype.Repository;
 import javax.persistence.TypedQuery;
@@ -10,8 +9,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * The type Consumer dao.
+ */
 @Repository
 public class ConsumerDao extends BaseDao<Consumer> {
+    /**
+     * Gets rating.
+     *
+     * @param consumer the consumer
+     * @return the rating
+     */
     public Double getRating(Consumer consumer) {
         Objects.requireNonNull(consumer);
 
@@ -25,15 +33,15 @@ public class ConsumerDao extends BaseDao<Consumer> {
             ParameterExpression<Consumer> reviewed = cb.parameter(Consumer.class);
 
             Predicate tenantOrOwner = cb.or(
-                    cb.equal(reviewRoot.get("contract").get("tenant"), reviewed),
-                    cb.equal(reviewRoot.get("contract").get("property").get("owner"), reviewed));
-            Predicate notEqualPredicate = cb.notEqual(reviewRoot.get("author"), reviewed);
+                    cb.equal(reviewRoot.get(Review_.contract).get(Contract_.tenant), reviewed),
+                    cb.equal(reviewRoot.get(Review_.contract).get(Contract_.property).get(Property_.owner), reviewed));
+            Predicate notEqualPredicate = cb.notEqual(reviewRoot.get(Review_.author), reviewed);
 
             predicates.add(tenantOrOwner);
             predicates.add(notEqualPredicate);
 
             cq.where(cb.and(predicates.toArray(new Predicate[0])));
-            Expression<Double> avgRating = cb.avg(reviewRoot.get("rating"));
+            Expression<Double> avgRating = cb.avg(reviewRoot.get(Review_.rating));
             cq.select(avgRating);
             TypedQuery<Double> query = em.createQuery(cq);
             query.setParameter(reviewed, consumer);

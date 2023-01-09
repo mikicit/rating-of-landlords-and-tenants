@@ -3,6 +3,9 @@ package dev.mikita.rolt.dto.review;
 import lombok.Data;
 import java.time.LocalDateTime;
 
+/**
+ * The type Response public review dto.
+ */
 @Data
 public class ResponsePublicReviewDto {
     private Integer id;

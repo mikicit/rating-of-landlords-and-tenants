@@ -4,6 +4,7 @@ import dev.mikita.rolt.dto.contract.ResponsePublicContractDto;
 import dev.mikita.rolt.dto.review.ResponsePublicReviewDto;
 import dev.mikita.rolt.entity.*;
 import dev.mikita.rolt.exception.NotFoundException;
+import dev.mikita.rolt.security.model.CustomUserDetails;
 import dev.mikita.rolt.service.ConsumerService;
 import dev.mikita.rolt.service.ContractService;
 import dev.mikita.rolt.service.ReviewService;
@@ -18,6 +19,8 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
 import java.time.LocalDate;
@@ -26,6 +29,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * The type Consumer controller.
+ */
 @RestController
 @RequestMapping("/rest/v1/consumers")
 public class ConsumerController {
@@ -35,6 +41,13 @@ public class ConsumerController {
     private ReviewService reviewService;
     private ContractService contractService;
 
+    /**
+     * Instantiates a new Consumer controller.
+     *
+     * @param consumerService the consumer service
+     * @param reviewService   the review service
+     * @param contractService the contract service
+     */
     @Autowired
     public ConsumerController(
             ConsumerService consumerService,
@@ -45,6 +58,15 @@ public class ConsumerController {
         this.contractService = contractService;
     }
 
+    /**
+     * Gets reviews.
+     *
+     * @param principal the principal
+     * @param id        the id
+     * @param page      the page
+     * @param size      the size
+     * @return the reviews
+     */
     @GetMapping(value = "/{id}/reviews", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map<String, Object>> getReviews(
             Principal principal,
@@ -79,7 +101,18 @@ public class ConsumerController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    //    @PreAuthorize("hasAnyRole('ROLE_LANDLORD', 'ROLE_TENANT', 'ROLE_MODERATOR', 'ROLE_ADMIN')")
+    /**
+     * Gets contracts.
+     *
+     * @param principal the principal
+     * @param id        the id
+     * @param page      the page
+     * @param size      the size
+     * @param fromDate  the fromDate
+     * @param toDate    the toDate
+     * @return the contracts
+     */
+    @PreAuthorize("hasAnyRole('ROLE_LANDLORD', 'ROLE_TENANT', 'ROLE_MODERATOR', 'ROLE_ADMIN')")
     @GetMapping(value = "/{id}/contracts", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map<String, Object>> getContracts(
             Principal principal,
@@ -91,14 +124,14 @@ public class ConsumerController {
             @RequestParam(required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate) {
 
-//        final CustomUserDetails userDetails = (CustomUserDetails) principal;
-//        final User user = userDetails.getUser();
-//
-//        if ((user.getRole() != Role.ADMIN
-//                || user.getRole() != Role.MODERATOR)
-//                && !user.getId().equals(id)) {
-//            throw new AccessDeniedException("Cannot view another landlord's contracts.");
-//        }
+        final CustomUserDetails userDetails = (CustomUserDetails) principal;
+        final User user = userDetails.getUser();
+
+        if ((user.getRole() != Role.ADMIN
+                || user.getRole() != Role.MODERATOR)
+                && !user.getId().equals(id)) {
+            throw new AccessDeniedException("Cannot view another landlord's contracts.");
+        }
 
         final Consumer consumer = consumerService.find(id);
         if (consumer == null)
@@ -133,8 +166,14 @@ public class ConsumerController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    /**
+     * Gets rating.
+     *
+     * @param id the id
+     * @return the rating
+     */
     @GetMapping(value = "/{id}/rating", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Double> getContracts(@PathVariable Integer id) {
+    public ResponseEntity<Double> getRating(@PathVariable Integer id) {
         final Consumer consumer = consumerService.find(id);
         if (consumer == null)
             throw NotFoundException.create("Consumer", id);

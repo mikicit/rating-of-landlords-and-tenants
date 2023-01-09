@@ -4,6 +4,9 @@ import dev.mikita.rolt.entity.ConsumerGender;
 import lombok.Data;
 import javax.validation.constraints.*;
 
+/**
+ * The type Request create landlord dto.
+ */
 @Data
 public class RequestCreateLandlordDto {
     @Email(message = "Email should be valid.")

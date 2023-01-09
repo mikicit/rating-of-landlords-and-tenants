@@ -5,6 +5,9 @@ import javax.validation.constraints.Future;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 
+/**
+ * The type Request update contract dto.
+ */
 @Data
 public class RequestUpdateContractDto {
     @NotNull(message = "Specify the contract id.")

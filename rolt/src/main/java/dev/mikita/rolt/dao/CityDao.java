@@ -1,6 +1,7 @@
 package dev.mikita.rolt.dao;
 
 import dev.mikita.rolt.entity.City;
+import dev.mikita.rolt.entity.City_;
 import dev.mikita.rolt.exception.PersistenceException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -12,8 +13,18 @@ import javax.persistence.criteria.*;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * The type City dao.
+ */
 @Repository
 public class CityDao extends BaseDao<City> {
+    /**
+     * Find all page.
+     *
+     * @param pageable the pageable
+     * @param name     the name
+     * @return the page
+     */
     public Page<City> findAll(Pageable pageable, String name) {
         Objects.requireNonNull(pageable);
 
@@ -27,6 +38,13 @@ public class CityDao extends BaseDao<City> {
         }
     }
 
+    /**
+     * Creates a findAll query.
+     * @param pageable pageable
+     * @param name name
+     * @param count count
+     * @return query
+     */
     private TypedQuery<?> createFindAllQuery(Pageable pageable, String name, boolean count) {
         Objects.requireNonNull(pageable);
 
@@ -43,7 +61,7 @@ public class CityDao extends BaseDao<City> {
         ParameterExpression<String> cityName = null;
         if (name != null) {
             cityName = cb.parameter(String.class);
-            Predicate equalsName = cb.equal(city.get("name"), cityName);
+            Predicate equalsName = cb.equal(city.get(City_.name), cityName);
             cq.where(cb.and(equalsName));
         }
 

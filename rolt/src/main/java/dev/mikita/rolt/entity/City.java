@@ -4,6 +4,9 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Objects;
 
+/**
+ * The type City.
+ */
 @Entity
 @Table(name = "rolt_city")
 @NamedQueries({
@@ -18,18 +21,38 @@ public class City implements Serializable {
     @Column(name = "name", nullable = false, length = 64, unique = true)
     private String name;
 
+    /**
+     * Gets id.
+     *
+     * @return the id
+     */
     public Integer getId() {
         return id;
     }
 
+    /**
+     * Sets id.
+     *
+     * @param id the id
+     */
     public void setId(Integer id) {
         this.id = id;
     }
 
+    /**
+     * Gets name.
+     *
+     * @return the name
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * Sets name.
+     *
+     * @param name the name
+     */
     public void setName(String name) {
         Objects.requireNonNull(name);
         this.name = name;

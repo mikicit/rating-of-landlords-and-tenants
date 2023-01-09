@@ -33,6 +33,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * The type Contract controller.
+ */
 @RestController
 @RequestMapping("/rest/v1/contracts")
 public class ContractController {
@@ -42,6 +45,13 @@ public class ContractController {
     private final PropertyService propertyService;
     private final TenantService tenantService;
 
+    /**
+     * Instantiates a new Contract controller.
+     *
+     * @param contractService the contract service
+     * @param propertyService the property service
+     * @param tenantService the tenant service
+     */
     public ContractController(ContractService contractService,
                               PropertyService propertyService,
                               TenantService tenantService) {
@@ -50,7 +60,16 @@ public class ContractController {
         this.tenantService = tenantService;
     }
 
-//    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
+    /**
+     * Gets contracts.
+     *
+     * @param page the page
+     * @param size the size
+     * @param fromDate the fromDate
+     * @param toDate the toDate
+     * @return the contracts
+     */
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map<String, Object>> getContracts(
             @RequestParam(defaultValue = "0") int page,
@@ -83,7 +102,14 @@ public class ContractController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-//    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR', 'ROLE_TENANT', 'ROLE_MODERATOR')")
+    /**
+     * Gets contract.
+     *
+     * @param principal the principal
+     * @param id the id
+     * @return the contract
+     */
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR', 'ROLE_TENANT', 'ROLE_MODERATOR')")
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponsePublicContractDto getContract(Principal principal, @PathVariable Integer id) {
         final Contract contract = contractService.find(id);
@@ -92,26 +118,35 @@ public class ContractController {
             throw NotFoundException.create("Contract", id);
         }
 
-//        final CustomUserDetails userDetails = (CustomUserDetails) principal;
-//        final User user = userDetails.getUser();
-//
-//        if ((user.getRole() != Role.ADMIN || user.getRole() != Role.MODERATOR)
-//            && (!contract.getTenant().getId().equals(user.getId())
-//            || !contract.getProperty().getOwner().getId().equals(user.getId()))) {
-//            throw new AccessDeniedException("Cannot access contract of another customer.");
-//        }
+        final CustomUserDetails userDetails = (CustomUserDetails) principal;
+        final User user = userDetails.getUser();
+
+        if ((user.getRole() != Role.ADMIN || user.getRole() != Role.MODERATOR)
+            && (!contract.getTenant().getId().equals(user.getId())
+            || !contract.getProperty().getOwner().getId().equals(user.getId()))) {
+            throw new AccessDeniedException("Cannot access contract of another customer.");
+        }
 
         return new ModelMapper().map(contract, ResponsePublicContractDto.class);
     }
 
-//    @PreAuthorize("hasRole('ROLE_TENANT')")
+    /**
+     * Create contract response entity.
+     *
+     * @param principal the principal
+     * @param contractDto the contract dto
+     * @return the response entity
+     */
+    @PreAuthorize("hasAnyRole('ROLE_TENANT', 'ROLE_ADMIN', 'ROLE_MODERATOR')")
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Void> createContract(@RequestBody @Valid RequestCreateContractDto contractDto) {
+    public ResponseEntity<Void> createContract(Principal principal, @RequestBody @Valid RequestCreateContractDto contractDto) {
+        final CustomUserDetails userDetails = (CustomUserDetails) principal;
+        final User user = userDetails.getUser();
 
-//        // TODO Compare tenant's id with tenant's id in contractDto
-//        if (!original.getId().equals(contractDto.getTenantId())) {
-//            throw new ValidationException("You cannot create contracts for other users.");
-//        }
+        if ((user.getRole() != Role.ADMIN || user.getRole() != Role.MODERATOR)
+                && !user.getId().equals(contractDto.getTenantId())) {
+            throw new AccessDeniedException("You cannot create contracts for other users.");
+        }
 
         ModelMapper modelMapper = new ModelMapper();
         modelMapper.getConfiguration().setAmbiguityIgnored(true);
@@ -133,7 +168,13 @@ public class ContractController {
         return new ResponseEntity<>(headers, HttpStatus.CREATED);
     }
 
-    //    @PreAuthorize("hasAnyRole('ROLE_LANDLORD', 'ROLE_MODERATOR')")
+    /**
+     * Update contract.
+     *
+     * @param id the id
+     * @param contractDto the contract dto
+     */
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateContract(@PathVariable Integer id, @RequestBody @Valid RequestUpdateContractDto contractDto) {
@@ -164,10 +205,15 @@ public class ContractController {
         LOG.debug("Updated property {}.", contract);
     }
 
-//    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
+    /**
+     * Delete contract.
+     *
+     * @param id the id
+     */
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
     @DeleteMapping(value = "/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteContract(Principal principal, @PathVariable Integer id) {
+    public void deleteContract(@PathVariable Integer id) {
         final Contract toRemove = contractService.find(id);
         if (toRemove == null) {
             return;

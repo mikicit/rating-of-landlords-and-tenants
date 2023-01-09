@@ -16,6 +16,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * The type Moderator controller.
+ */
 @RestController
 @RequestMapping("/rest/v1/moderators")
 public class ModeratorController {
@@ -23,14 +26,25 @@ public class ModeratorController {
 
     private ModeratorService moderatorService;
 
+    /**
+     * Instantiates a new Moderator controller.
+     *
+     * @param moderatorService the moderator service
+     */
     @Autowired
     public ModeratorController(ModeratorService moderatorService) {
         this.moderatorService = moderatorService;
     }
 
+    /**
+     * Create moderator response entity.
+     *
+     * @param moderator the moderator
+     * @return the response entity
+     */
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Void> createLandlord(@RequestBody Moderator moderator) {
+    public ResponseEntity<Void> createModerator(@RequestBody Moderator moderator) {
         moderatorService.persist(moderator);
         final HttpHeaders headers = RestUtils.createLocationHeaderFromCurrentUri("/current");
         return new ResponseEntity<>(headers, HttpStatus.CREATED);

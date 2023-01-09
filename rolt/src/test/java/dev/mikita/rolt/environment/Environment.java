@@ -2,7 +2,7 @@ package dev.mikita.rolt.environment;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.mikita.rolt.config.AppConfig;
 import dev.mikita.rolt.entity.User;
-//import dev.mikita.rolt.security.entity.AuthenticationToken;
+import dev.mikita.rolt.security.model.AuthenticationToken;
 import dev.mikita.rolt.security.model.CustomUserDetails;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
@@ -46,7 +46,7 @@ public class Environment {
     public static void setCurrentUser(User user) {
         final CustomUserDetails userDetails = new CustomUserDetails(user, new HashSet<>());
         SecurityContext context = new SecurityContextImpl();
-//        context.setAuthentication(new AuthenticationToken(userDetails.getAuthorities(), userDetails));
+        context.setAuthentication(new AuthenticationToken(userDetails.getAuthorities(), userDetails));
         SecurityContextHolder.setContext(context);
     }
 

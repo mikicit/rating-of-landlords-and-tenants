@@ -14,8 +14,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * The type Property dao.
+ */
 @Repository
 public class PropertyDao extends BaseDao<Property> {
+    /**
+     * Find all page.
+     *
+     * @param pageable the pageable
+     * @param filters  the filters
+     * @return the page
+     */
     public Page<Property> findAll(Pageable pageable, Map<String, Object> filters) {
         Objects.requireNonNull(pageable);
         Objects.requireNonNull(filters);
@@ -30,6 +40,13 @@ public class PropertyDao extends BaseDao<Property> {
         }
     }
 
+    /**
+     * Creates a findAll query.
+     * @param pageable pageable
+     * @param filters filters
+     * @param count count
+     * @return query
+     */
     private TypedQuery<?> createFindAllQuery(Pageable pageable, Map<String, Object> filters, boolean count) {
         Objects.requireNonNull(pageable);
         Objects.requireNonNull(filters);
@@ -50,43 +67,43 @@ public class PropertyDao extends BaseDao<Property> {
         ParameterExpression<Enum> status = null;
         if (filters.containsKey("status")) {
             status = cb.parameter(Enum.class);
-            predicates.add(cb.equal(property.get("status"), status));
+            predicates.add(cb.equal(property.get(Property_.status), status));
         }
 
         ParameterExpression<City> city = null;
         if (filters.containsKey("cityId")) {
             city = cb.parameter(City.class);
-            predicates.add(cb.equal(property.get("city"), city));
+            predicates.add(cb.equal(property.get(Property_.city), city));
         }
 
         ParameterExpression<Enum> propertyType = null;
         if (filters.containsKey("propertyType")) {
             propertyType = cb.parameter(Enum.class);
-            predicates.add(cb.equal(property.get("type"), propertyType));
+            predicates.add(cb.equal(property.get(Property_.type), propertyType));
         }
 
-        ParameterExpression<Integer> minSquare = null;
+        ParameterExpression<Double> minSquare = null;
         if (filters.containsKey("minSquare")) {
-            minSquare = cb.parameter(Integer.class);
-            predicates.add(cb.greaterThanOrEqualTo(property.get("square"), minSquare));
+            minSquare = cb.parameter(Double.class);
+            predicates.add(cb.greaterThanOrEqualTo(property.get(Property_.square), minSquare));
         }
 
-        ParameterExpression<Integer> maxSquare = null;
+        ParameterExpression<Double> maxSquare = null;
         if (filters.containsKey("maxSquare")) {
-            maxSquare = cb.parameter(Integer.class);
-            predicates.add(cb.lessThanOrEqualTo(property.get("square"), maxSquare));
+            maxSquare = cb.parameter(Double.class);
+            predicates.add(cb.lessThanOrEqualTo(property.get(Property_.square), maxSquare));
         }
 
         ParameterExpression<Boolean> isAvailable = null;
         if (filters.containsKey("isAvailable")) {
             isAvailable = cb.parameter(Boolean.class);
-            predicates.add(cb.equal(property.get("isAvailable"), isAvailable));
+            predicates.add(cb.equal(property.get(Property_.isAvailable), isAvailable));
         }
 
         ParameterExpression<Landlord> owner = null;
         if (filters.containsKey("ownerId")) {
             owner = cb.parameter(Landlord.class);
-            predicates.add(cb.equal(property.get("owner"), owner));
+            predicates.add(cb.equal(property.get(Property_.owner), owner));
         }
 
         if (!predicates.isEmpty()) {
@@ -121,11 +138,11 @@ public class PropertyDao extends BaseDao<Property> {
         }
 
         if (minSquare != null) {
-            query.setParameter(minSquare, (Integer) filters.get("minSquare"));
+            query.setParameter(minSquare, (Double) filters.get("minSquare"));
         }
 
         if (maxSquare != null) {
-            query.setParameter(maxSquare, (Integer) filters.get("maxSquare"));
+            query.setParameter(maxSquare, (Double) filters.get("maxSquare"));
         }
 
         if (isAvailable != null) {

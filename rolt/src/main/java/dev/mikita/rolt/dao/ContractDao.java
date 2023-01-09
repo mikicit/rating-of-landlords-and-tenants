@@ -12,8 +12,18 @@ import javax.persistence.criteria.*;
 import java.time.LocalDate;
 import java.util.*;
 
+/**
+ * The type Contract dao.
+ */
 @Repository
 public class ContractDao extends BaseDao<Contract> {
+    /**
+     * Find all page.
+     *
+     * @param pageable the pageable
+     * @param filters  the filters
+     * @return the page
+     */
     public Page<Contract> findAll(Pageable pageable, Map<String, Object> filters) {
         Objects.requireNonNull(pageable);
 
@@ -27,6 +37,14 @@ public class ContractDao extends BaseDao<Contract> {
         }
     }
 
+    /**
+     * Find intersections by date range list.
+     *
+     * @param property the property
+     * @param start    the start
+     * @param end      the end
+     * @return the list
+     */
     public List<Contract> findIntersectionsByDateRange(Property property, LocalDate start, LocalDate end) {
         Objects.requireNonNull(property);
         Objects.requireNonNull(start);
@@ -42,6 +60,13 @@ public class ContractDao extends BaseDao<Contract> {
         }
     }
 
+    /**
+     * Creates a findAll query.
+     * @param pageable pageable
+     * @param filters filters
+     * @param count count
+     * @return query
+     */
     private TypedQuery<?> createFindAllQuery(Pageable pageable, Map<String, Object> filters, boolean count) {
         Objects.requireNonNull(pageable);
         Objects.requireNonNull(filters);
@@ -62,31 +87,31 @@ public class ContractDao extends BaseDao<Contract> {
         ParameterExpression<Landlord> landlord = null;
         if (filters.containsKey("landlordId")) {
             landlord = cb.parameter(Landlord.class);
-            predicates.add(cb.equal(contract.get("property").get("owner"), landlord));
+            predicates.add(cb.equal(contract.get(Contract_.property).get(Property_.owner), landlord));
         }
 
         ParameterExpression<Tenant> tenant = null;
         if (filters.containsKey("tenantId")) {
             tenant = cb.parameter(Tenant.class);
-            predicates.add(cb.equal(contract.get("tenant"), tenant));
+            predicates.add(cb.equal(contract.get(Contract_.tenant), tenant));
         }
 
         ParameterExpression<Property> property = null;
         if (filters.containsKey("propertyId")) {
             property = cb.parameter(Property.class);
-            predicates.add(cb.equal(contract.get("property"), property));
+            predicates.add(cb.equal(contract.get(Contract_.property), property));
         }
 
         ParameterExpression<LocalDate> fromDate = null;
         if (filters.containsKey("fromDate")) {
             fromDate = cb.parameter(LocalDate.class);
-            predicates.add(cb.greaterThanOrEqualTo(contract.get("startDate"), fromDate));
+            predicates.add(cb.greaterThanOrEqualTo(contract.get(Contract_.startDate), fromDate));
         }
 
         ParameterExpression<LocalDate> toDate = null;
         if (filters.containsKey("toDate")) {
             toDate = cb.parameter(LocalDate.class);
-            predicates.add(cb.lessThanOrEqualTo(contract.get("endDate"), toDate));
+            predicates.add(cb.lessThanOrEqualTo(contract.get(Contract_.endDate), toDate));
         }
 
         if (!predicates.isEmpty()) {

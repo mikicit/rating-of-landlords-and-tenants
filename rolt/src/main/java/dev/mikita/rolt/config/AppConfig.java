@@ -17,8 +17,16 @@ import org.springframework.web.multipart.support.StandardServletMultipartResolve
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+/**
+ * The type App config.
+ */
 @Configuration
 public class AppConfig {
+    /**
+     * Password encoder password encoder.
+     *
+     * @return the password encoder
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -27,6 +35,8 @@ public class AppConfig {
     /**
      * {@link RestTemplate} can be used to communicate with web services of another application - see for example <a
      * href="http://www.baeldung.com/rest-template">http://www.baeldung.com/rest-template</a>.
+     *
+     * @return the rest template
      */
     @Bean
     public RestTemplate restTemplate() {
@@ -35,6 +45,8 @@ public class AppConfig {
 
     /**
      * {@link MultipartResolver} is used to support file upload.
+     *
+     * @return the multipart resolver
      */
     @Bean(name = "multipartResolver")
     public MultipartResolver multipartResolver() {
@@ -66,6 +78,11 @@ public class AppConfig {
         return objectMapper;
     }
 
+    /**
+     * Cors configurer web mvc configurer.
+     *
+     * @return the web mvc configurer
+     */
     @Bean
     public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {

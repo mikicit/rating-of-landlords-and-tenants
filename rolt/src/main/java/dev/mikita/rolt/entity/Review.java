@@ -5,6 +5,9 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+/**
+ * The type Review.
+ */
 @Entity
 @Table(name = "rolt_review",
         uniqueConstraints = {
@@ -43,45 +46,95 @@ public class Review implements Serializable {
     @Column(name = "rating", nullable = false)
     private Integer rating;
 
+    /**
+     * Gets id.
+     *
+     * @return the id
+     */
     public Integer getId() {
         return id;
     }
 
+    /**
+     * Sets id.
+     *
+     * @param id the id
+     */
     public void setId(Integer id) {
         this.id = id;
     }
 
+    /**
+     * Gets contract.
+     *
+     * @return the contract
+     */
     public Contract getContract() {
         return contract;
     }
 
+    /**
+     * Sets contract.
+     *
+     * @param contract the contract
+     */
     public void setContract(Contract contract) {
         Objects.requireNonNull(contract);
         this.contract = contract;
     }
 
+    /**
+     * Gets author.
+     *
+     * @return the author
+     */
     public Consumer getAuthor() {
         return author;
     }
 
+    /**
+     * Sets author.
+     *
+     * @param author the author
+     */
     public void setAuthor(Consumer author) {
         Objects.requireNonNull(author);
         this.author = author;
     }
 
+    /**
+     * Gets created on.
+     *
+     * @return the created on
+     */
     public LocalDateTime getCreatedOn() {
         return createdOn;
     }
 
+    /**
+     * Sets created on.
+     *
+     * @param createdOn the created on
+     */
     public void setCreatedOn(LocalDateTime createdOn) {
         Objects.requireNonNull(createdOn);
         this.createdOn = createdOn;
     }
 
+    /**
+     * Gets updated on.
+     *
+     * @return the updated on
+     */
     public LocalDateTime getUpdatedOn() {
         return updatedOn;
     }
 
+    /**
+     * Sets updated on.
+     *
+     * @param updatedOn the updated on
+     */
     public void setUpdatedOn(LocalDateTime updatedOn) {
         Objects.requireNonNull(updatedOn);
 
@@ -92,28 +145,58 @@ public class Review implements Serializable {
         this.updatedOn = updatedOn;
     }
 
+    /**
+     * Gets description.
+     *
+     * @return the description
+     */
     public String getDescription() {
         return description;
     }
 
+    /**
+     * Sets description.
+     *
+     * @param description the description
+     */
     public void setDescription(String description) {
         Objects.requireNonNull(description);
         this.description = description;
     }
 
+    /**
+     * Gets status.
+     *
+     * @return the status
+     */
     public PublicationStatus getStatus() {
         return status;
     }
 
+    /**
+     * Sets status.
+     *
+     * @param status the status
+     */
     public void setStatus(PublicationStatus status) {
         Objects.requireNonNull(status);
         this.status = status;
     }
 
+    /**
+     * Gets rating.
+     *
+     * @return the rating
+     */
     public Integer getRating() {
         return rating;
     }
 
+    /**
+     * Sets rating.
+     *
+     * @param rating the rating
+     */
     public void setRating(Integer rating) {
         Objects.requireNonNull(rating);
 
@@ -124,6 +207,9 @@ public class Review implements Serializable {
         this.rating = rating;
     }
 
+    /**
+     * Pre persist.
+     */
     @PrePersist
     public void prePersist() {
         if (!author.equals(contract.getTenant()) && !author.equals(contract.getProperty().getOwner())) {

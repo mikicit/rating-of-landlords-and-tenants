@@ -1,8 +1,6 @@
 package dev.mikita.rolt.rest;
 
-import dev.mikita.rolt.dto.contract.ResponsePublicContractDto;
 import dev.mikita.rolt.dto.property.ResponsePublicPropertyDto;
-import dev.mikita.rolt.dto.review.ResponsePublicReviewDto;
 import dev.mikita.rolt.dto.tenant.RequestCreateTenantDto;
 import dev.mikita.rolt.dto.tenant.RequestUpdateTenantDto;
 import dev.mikita.rolt.dto.tenant.ResponsePublicTenantDto;
@@ -11,9 +9,7 @@ import dev.mikita.rolt.exception.NotFoundException;
 import dev.mikita.rolt.exception.ValidationException;
 import dev.mikita.rolt.rest.util.RestUtils;
 import dev.mikita.rolt.security.model.CustomUserDetails;
-import dev.mikita.rolt.service.ContractService;
 import dev.mikita.rolt.service.PropertyService;
-import dev.mikita.rolt.service.ReviewService;
 import dev.mikita.rolt.service.TenantService;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
@@ -22,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -32,12 +27,14 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.security.Principal;
-import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * The type Tenant controller.
+ */
 @RestController
 @RequestMapping("/rest/v1/tenants")
 public class TenantController {
@@ -45,21 +42,28 @@ public class TenantController {
 
     private final TenantService tenantService;
     private final PropertyService propertyService;
-    private final ContractService contractService;
-    private final ReviewService reviewService;
 
+    /**
+     * Instantiates a new Tenant controller.
+     *
+     * @param tenantService   the tenant service
+     * @param propertyService the property service
+     */
     @Autowired
     public TenantController(TenantService tenantService,
-                            PropertyService propertyService,
-                            ContractService contractService,
-                            ReviewService reviewService) {
+                            PropertyService propertyService
+                            ) {
         this.tenantService = tenantService;
         this.propertyService = propertyService;
-        this.contractService = contractService;
-        this.reviewService = reviewService;
     }
 
-//    @PreAuthorize("hasAnyRole('ROLE_LANDLORD', 'ROLE_GUEST', 'ROLE_TENANT', 'ROLE_ADMIN', 'ROLE_MODERATOR')")
+    /**
+     * Create response entity.
+     *
+     * @param tenantDto the tenant dto
+     * @return the response entity
+     */
+    @PreAuthorize("(anonymous || hasAnyRole('ROLE_MODERATOR', 'ROLE_ADMIN'))")
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> create(@RequestBody @Valid RequestCreateTenantDto tenantDto) {
         Tenant tenant = new ModelMapper().map(tenantDto, Tenant.class);
@@ -68,6 +72,15 @@ public class TenantController {
         return new ResponseEntity<>(headers, HttpStatus.CREATED);
     }
 
+    /**
+     * Gets tenants.
+     *
+     * @param page     the page
+     * @param size     the size
+     * @param gender   the gender
+     * @param inSearch the in search
+     * @return the tenants
+     */
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map<String, Object>> getTenants(
             @RequestParam(defaultValue = "0") int page,
@@ -99,6 +112,12 @@ public class TenantController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    /**
+     * Gets tenant.
+     *
+     * @param id the id
+     * @return the tenant
+     */
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponsePublicTenantDto getTenant(@PathVariable Integer id) {
         final Tenant tenant = tenantService.find(id);
@@ -108,17 +127,24 @@ public class TenantController {
         return new ModelMapper().map(tenant, ResponsePublicTenantDto.class);
     }
 
-//    @PreAuthorize("hasAnyRole('ROLE_TENANT', 'ROLE_MODERATOR', 'ROLE_ADMIN')")
+    /**
+     * Update tenant.
+     *
+     * @param principal the principal
+     * @param id        the id
+     * @param tenantDto the tenant dto
+     */
+    @PreAuthorize("hasAnyRole('ROLE_TENANT', 'ROLE_MODERATOR', 'ROLE_ADMIN')")
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateTenant(Principal principal, @PathVariable Integer id, @RequestBody @Valid RequestUpdateTenantDto tenantDto) {
-//        final CustomUserDetails userDetails = (CustomUserDetails) principal;
-//        final User user = userDetails.getUser();
-//
-//        if ((user.getRole() != Role.ADMIN || user.getRole() != Role.MODERATOR) &&
-//                !user.getId().equals(id)) {
-//            throw new AccessDeniedException("Cannot update another tenant.");
-//        }
+        final CustomUserDetails userDetails = (CustomUserDetails) principal;
+        final User user = userDetails.getUser();
+
+        if ((user.getRole() != Role.ADMIN || user.getRole() != Role.MODERATOR) &&
+                !user.getId().equals(id)) {
+            throw new AccessDeniedException("Cannot update another tenant.");
+        }
 
         final Tenant original = tenantService.find(id);
         if (original == null)
@@ -134,17 +160,23 @@ public class TenantController {
         LOG.debug("Updated tenant {}.", tenant);
     }
 
-//    @PreAuthorize("hasAnyRole('ROLE_TENANT', 'ROLE_MODERATOR', 'ROLE_ADMIN')")
+    /**
+     * Delete tenant.
+     *
+     * @param principal the principal
+     * @param id        the id
+     */
+    @PreAuthorize("hasAnyRole('ROLE_TENANT', 'ROLE_MODERATOR', 'ROLE_ADMIN')")
     @DeleteMapping(value = "/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteTenant(Principal principal, @PathVariable Integer id) {
-//        final CustomUserDetails userDetails = (CustomUserDetails) principal;
-//        final User user = userDetails.getUser();
-//
-//        if ((user.getRole() != Role.ADMIN || user.getRole() != Role.MODERATOR)
-//                && !user.getId().equals(id)) {
-//            throw new AccessDeniedException("Cannot delete another tenant.");
-//        }
+        final CustomUserDetails userDetails = (CustomUserDetails) principal;
+        final User user = userDetails.getUser();
+
+        if ((user.getRole() != Role.ADMIN || user.getRole() != Role.MODERATOR)
+                && !user.getId().equals(id)) {
+            throw new AccessDeniedException("Cannot delete another tenant.");
+        }
 
         final Tenant toRemove = tenantService.find(id);
         if (toRemove == null) {
@@ -155,16 +187,23 @@ public class TenantController {
         LOG.debug("Removed tenant {}.", toRemove);
     }
 
-//    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR', 'ROLE_TENANT')")
+    /**
+     * Gets favorites.
+     *
+     * @param principal the principal
+     * @param id        the id
+     * @return the favorites
+     */
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR', 'ROLE_TENANT')")
     @GetMapping(value = "/{id}/favorites", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<ResponsePublicPropertyDto> getFavorites(Principal principal, @PathVariable Integer id) {
-//        final CustomUserDetails userDetails = (CustomUserDetails) principal;
-//        final User user = userDetails.getUser();
-//
-//        if ((user.getRole() != Role.ADMIN || user.getRole() != Role.MODERATOR) &&
-//                !user.getId().equals(id)) {
-//            throw new AccessDeniedException("Cannot access favorites of another tenant.");
-//        }
+        final CustomUserDetails userDetails = (CustomUserDetails) principal;
+        final User user = userDetails.getUser();
+
+        if ((user.getRole() != Role.ADMIN || user.getRole() != Role.MODERATOR) &&
+                !user.getId().equals(id)) {
+            throw new AccessDeniedException("Cannot access favorites of another tenant.");
+        }
 
         ModelMapper modelMapper = new ModelMapper();
 
@@ -177,16 +216,23 @@ public class TenantController {
                 .collect(Collectors.toList());
     }
 
-//    @PreAuthorize("hasRole('ROLE_TENANT')")
+    /**
+     * Add favorite.
+     *
+     * @param principal   the principal
+     * @param user_id     the user id
+     * @param property_id the property id
+     */
+    @PreAuthorize("hasRole('ROLE_TENANT')")
     @PutMapping(value = "/{user_id}/favorites/{property_id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void addFavorite(Principal principal, @PathVariable Integer user_id, @PathVariable Integer property_id) {
-//        final CustomUserDetails userDetails = (CustomUserDetails) principal;
-//        final User user = userDetails.getUser();
-//
-//        if (!user.getId().equals(user_id)) {
-//            throw new AccessDeniedException("Cannot access favorites of another tenant.");
-//        }
+        final CustomUserDetails userDetails = (CustomUserDetails) principal;
+        final User user = userDetails.getUser();
+
+        if (!user.getId().equals(user_id)) {
+            throw new AccessDeniedException("Cannot access favorites of another tenant.");
+        }
 
         final Tenant tenant = tenantService.find(user_id);
         if (tenant == null)
@@ -200,15 +246,22 @@ public class TenantController {
         tenantService.addFavorite(property, tenant);
     }
 
-//    @PreAuthorize("hasRole('ROLE_TENANT')")
+    /**
+     * Remove favorite.
+     *
+     * @param principal   the principal
+     * @param user_id     the user id
+     * @param property_id the property id
+     */
+    @PreAuthorize("hasRole('ROLE_TENANT')")
     @DeleteMapping(value = "/{user_id}/favorites/{property_id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public void removeFavorite(Principal principal, @PathVariable Integer user_id, @PathVariable Integer property_id) {
-//        final CustomUserDetails userDetails = (CustomUserDetails) principal;
-//        final User user = userDetails.getUser();
-//
-//        if (!user.getId().equals(user_id)) {
-//            throw new AccessDeniedException("Cannot access favorites of another tenant.");
-//        }
+        final CustomUserDetails userDetails = (CustomUserDetails) principal;
+        final User user = userDetails.getUser();
+
+        if (!user.getId().equals(user_id)) {
+            throw new AccessDeniedException("Cannot access favorites of another tenant.");
+        }
 
         final Tenant tenant = tenantService.find(user_id);
         if (tenant == null)
