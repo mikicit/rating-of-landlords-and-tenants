@@ -23,6 +23,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.MediaType;
 import javax.validation.Valid;
@@ -118,7 +119,7 @@ public class ContractController {
             throw NotFoundException.create("Contract", id);
         }
 
-        final CustomUserDetails userDetails = (CustomUserDetails) principal;
+        final CustomUserDetails userDetails = (CustomUserDetails) ((Authentication) principal).getPrincipal();
         final User user = userDetails.getUser();
 
         if ((user.getRole() != Role.ADMIN || user.getRole() != Role.MODERATOR)
@@ -140,7 +141,7 @@ public class ContractController {
     @PreAuthorize("hasAnyRole('ROLE_TENANT', 'ROLE_ADMIN', 'ROLE_MODERATOR')")
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> createContract(Principal principal, @RequestBody @Valid RequestCreateContractDto contractDto) {
-        final CustomUserDetails userDetails = (CustomUserDetails) principal;
+        final CustomUserDetails userDetails = (CustomUserDetails) ((Authentication) principal).getPrincipal();
         final User user = userDetails.getUser();
 
         if ((user.getRole() != Role.ADMIN || user.getRole() != Role.MODERATOR)

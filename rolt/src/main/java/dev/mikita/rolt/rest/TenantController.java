@@ -24,6 +24,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.security.Principal;
@@ -138,7 +139,7 @@ public class TenantController {
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateTenant(Principal principal, @PathVariable Integer id, @RequestBody @Valid RequestUpdateTenantDto tenantDto) {
-        final CustomUserDetails userDetails = (CustomUserDetails) principal;
+        final CustomUserDetails userDetails = (CustomUserDetails) ((Authentication) principal).getPrincipal();
         final User user = userDetails.getUser();
 
         if ((user.getRole() != Role.ADMIN || user.getRole() != Role.MODERATOR) &&
@@ -170,7 +171,7 @@ public class TenantController {
     @DeleteMapping(value = "/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteTenant(Principal principal, @PathVariable Integer id) {
-        final CustomUserDetails userDetails = (CustomUserDetails) principal;
+        final CustomUserDetails userDetails = (CustomUserDetails) ((Authentication) principal).getPrincipal();
         final User user = userDetails.getUser();
 
         if ((user.getRole() != Role.ADMIN || user.getRole() != Role.MODERATOR)
@@ -196,8 +197,11 @@ public class TenantController {
      */
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR', 'ROLE_TENANT')")
     @GetMapping(value = "/{id}/favorites", produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<ResponsePublicPropertyDto> getFavorites(Principal principal, @PathVariable Integer id) {
-        final CustomUserDetails userDetails = (CustomUserDetails) principal;
+    public List<ResponsePublicPropertyDto> getFavorites(
+            Principal principal,
+            @PathVariable Integer id) {
+
+        final CustomUserDetails userDetails = (CustomUserDetails) ((Authentication) principal).getPrincipal();
         final User user = userDetails.getUser();
 
         if ((user.getRole() != Role.ADMIN || user.getRole() != Role.MODERATOR) &&
@@ -227,7 +231,7 @@ public class TenantController {
     @PutMapping(value = "/{user_id}/favorites/{property_id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void addFavorite(Principal principal, @PathVariable Integer user_id, @PathVariable Integer property_id) {
-        final CustomUserDetails userDetails = (CustomUserDetails) principal;
+        final CustomUserDetails userDetails = (CustomUserDetails) ((Authentication) principal).getPrincipal();
         final User user = userDetails.getUser();
 
         if (!user.getId().equals(user_id)) {
@@ -256,7 +260,7 @@ public class TenantController {
     @PreAuthorize("hasRole('ROLE_TENANT')")
     @DeleteMapping(value = "/{user_id}/favorites/{property_id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public void removeFavorite(Principal principal, @PathVariable Integer user_id, @PathVariable Integer property_id) {
-        final CustomUserDetails userDetails = (CustomUserDetails) principal;
+        final CustomUserDetails userDetails = (CustomUserDetails) ((Authentication) principal).getPrincipal();
         final User user = userDetails.getUser();
 
         if (!user.getId().equals(user_id)) {

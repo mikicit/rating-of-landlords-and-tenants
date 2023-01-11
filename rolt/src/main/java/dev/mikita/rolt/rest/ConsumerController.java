@@ -21,6 +21,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
 import java.time.LocalDate;
@@ -124,13 +125,13 @@ public class ConsumerController {
             @RequestParam(required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate) {
 
-        final CustomUserDetails userDetails = (CustomUserDetails) principal;
+        final CustomUserDetails userDetails = (CustomUserDetails) ((Authentication) principal).getPrincipal();
         final User user = userDetails.getUser();
 
         if ((user.getRole() != Role.ADMIN
                 || user.getRole() != Role.MODERATOR)
                 && !user.getId().equals(id)) {
-            throw new AccessDeniedException("Cannot view another landlord's contracts.");
+            throw new AccessDeniedException("Cannot view another consumer's contracts.");
         }
 
         final Consumer consumer = consumerService.find(id);

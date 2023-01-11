@@ -7,6 +7,7 @@ import dev.mikita.rolt.entity.*;
 import dev.mikita.rolt.exception.NotFoundException;
 import dev.mikita.rolt.exception.ValidationException;
 import dev.mikita.rolt.rest.util.RestUtils;
+import dev.mikita.rolt.security.model.CustomUserDetails;
 import dev.mikita.rolt.service.ConsumerService;
 import dev.mikita.rolt.service.ContractService;
 import dev.mikita.rolt.service.ReviewService;
@@ -22,7 +23,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.security.Principal;
@@ -122,12 +125,23 @@ public class ReviewController {
     /**
      * Add review response entity.
      *
+     * @param principal the principal
      * @param reviewDto the review dto
      * @return the response entity
      */
     @PreAuthorize("hasAnyRole('ROLE_LANDLORD', 'ROLE_TENANT', 'ROLE_ADMIN', 'ROLE_MODERATOR')")
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Void> addReview(@RequestBody @Valid RequestCreateReviewDto reviewDto) {
+    public ResponseEntity<Void> addReview(
+            Principal principal,
+            @RequestBody @Valid RequestCreateReviewDto reviewDto) {
+
+        final CustomUserDetails userDetails = (CustomUserDetails) ((Authentication) principal).getPrincipal();
+        final User user = userDetails.getUser();
+
+        if (!user.getId().equals(reviewDto.getAuthorId())) {
+            throw new AccessDeniedException("You cannot add review from other users.");
+        }
+
         final Contract contract = contractService.find(reviewDto.getContractId());
         if (contract == null)
             throw NotFoundException.create("Contract", reviewDto.getContractId());

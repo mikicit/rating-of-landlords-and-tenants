@@ -24,6 +24,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.security.Principal;
@@ -135,7 +136,7 @@ public class LandlordController {
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateLandlord(Principal principal, @PathVariable Integer id, @RequestBody @Valid RequestUpdateLandlordDto landlordDto) {
-        final CustomUserDetails userDetails = (CustomUserDetails) principal;
+        final CustomUserDetails userDetails = (CustomUserDetails) ((Authentication) principal).getPrincipal();
         final User user = userDetails.getUser();
 
         if ((user.getRole() != Role.ADMIN
@@ -169,7 +170,7 @@ public class LandlordController {
     @DeleteMapping(value = "/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteLandlord(Principal principal, @PathVariable Integer id) {
-        final CustomUserDetails userDetails = (CustomUserDetails) principal;
+        final CustomUserDetails userDetails = (CustomUserDetails) ((Authentication) principal).getPrincipal();
         final User user = userDetails.getUser();
 
         if ((user.getRole() != Role.ADMIN

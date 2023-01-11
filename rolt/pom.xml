@@ -133,7 +133,7 @@
                             <processors>
                                 <processor>org.eclipse.persistence.internal.jpa.modelgen.CanonicalModelProcessor</processor>
                             </processors>
-                            <compilerArguments>-Aeclipselink.persistencexml=${basedir}/src/main/resources/META-INF/persistence.xml</compilerArguments>
+                            <compilerArguments>-Aeclipselink.persistencexml=${basedir}/src/main/resources/META-INF/metamodel.xml</compilerArguments>
                             <outputDirectory>${project.build.directory}/generated-sources/meta-model</outputDirectory>
                         </configuration>
                     </execution>
@@ -161,6 +161,7 @@
                         <configuration>
                             <sources>
                                 <source>target/generated-sources/annotations</source>
+                                <source>target/generated-sources/meta-model</source>
                             </sources>
                         </configuration>
                     </execution>

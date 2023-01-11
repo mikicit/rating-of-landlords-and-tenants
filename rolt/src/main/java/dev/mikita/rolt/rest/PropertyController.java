@@ -24,6 +24,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.security.Principal;
@@ -134,7 +135,7 @@ public class PropertyController {
     @PreAuthorize("hasAnyRole('ROLE_LANDLORD', 'ROLE_ADMIN', 'ROLE_MODERATOR')")
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> createProperty(Principal principal, @RequestBody @Valid RequestCreatePropertyDto propertyDto) {
-        final CustomUserDetails userDetails = (CustomUserDetails) principal;
+        final CustomUserDetails userDetails = (CustomUserDetails) ((Authentication) principal).getPrincipal();
         final User user = userDetails.getUser();
 
         if ((user.getRole() != Role.ADMIN || user.getRole() != Role.MODERATOR)
@@ -187,7 +188,7 @@ public class PropertyController {
             throw new ValidationException("Property identifier in the data does not match the one in the request URL.");
         }
 
-        final CustomUserDetails userDetails = (CustomUserDetails) principal;
+        final CustomUserDetails userDetails = (CustomUserDetails) ((Authentication) principal).getPrincipal();
         final User user = userDetails.getUser();
 
         if ((user.getRole() != Role.ADMIN || user.getRole() != Role.MODERATOR)
@@ -224,7 +225,7 @@ public class PropertyController {
             return;
         }
 
-        final CustomUserDetails userDetails = (CustomUserDetails) principal;
+        final CustomUserDetails userDetails = (CustomUserDetails) ((Authentication) principal).getPrincipal();
         final User user = userDetails.getUser();
 
         if ((user.getRole() != Role.ADMIN || user.getRole() != Role.MODERATOR)
