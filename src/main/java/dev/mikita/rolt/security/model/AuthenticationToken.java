@@ -4,12 +4,13 @@ import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import java.security.Principal;
 import java.util.Collection;
+import java.util.Objects;
 
 /**
  * The type Authentication token.
  */
 public class AuthenticationToken extends AbstractAuthenticationToken implements Principal {
-    private CustomUserDetails userDetails;
+    private final CustomUserDetails userDetails;
 
     /**
      * Instantiates a new Authentication token.
@@ -24,21 +25,27 @@ public class AuthenticationToken extends AbstractAuthenticationToken implements 
         super.setDetails(userDetails);
     }
 
-    /**
-     * Returns credentials.
-     * @return the credentials
-     */
     @Override
     public String getCredentials() {
         return userDetails.getPassword();
     }
 
-    /**
-     * Returns principal.
-     * @return the principal
-     */
     @Override
     public CustomUserDetails getPrincipal() {
         return userDetails;
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof AuthenticationToken that)) return false;
+        if (!super.equals(o)) return false;
+        return Objects.equals(userDetails, that.userDetails);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), userDetails);
     }
 }

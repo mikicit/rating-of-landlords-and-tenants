@@ -1,6 +1,7 @@
 package dev.mikita.rolt.environment;
 
-import dev.mikita.rolt.entity.*;
+import dev.mikita.rolt.model.*;
+
 import java.time.LocalDate;
 import java.util.Random;
 

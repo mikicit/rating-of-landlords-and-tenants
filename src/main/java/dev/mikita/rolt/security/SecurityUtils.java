@@ -1,6 +1,6 @@
 package dev.mikita.rolt.security;
 
-import dev.mikita.rolt.entity.User;
+import dev.mikita.rolt.model.User;
 import dev.mikita.rolt.security.model.AuthenticationToken;
 import dev.mikita.rolt.security.model.CustomUserDetails;
 import org.springframework.security.core.context.SecurityContext;
@@ -11,6 +11,8 @@ import org.springframework.security.core.context.SecurityContextImpl;
  * The type Security utils.
  */
 public class SecurityUtils {
+    private SecurityUtils() {
+    }
 
     /**
      * Gets the currently authenticated user.
@@ -31,8 +33,9 @@ public class SecurityUtils {
      */
     public static CustomUserDetails getCurrentUserDetails() {
         final SecurityContext context = SecurityContextHolder.getContext();
-        if (context.getAuthentication() != null && context.getAuthentication().getDetails() instanceof CustomUserDetails) {
-            return (CustomUserDetails) context.getAuthentication().getDetails();
+        if (context.getAuthentication() != null
+                && context.getAuthentication().getDetails() instanceof CustomUserDetails userDetails) {
+            return userDetails;
         } else {
             return null;
         }

@@ -1,29 +1,42 @@
 package dev.mikita.rolt.service;
 
-import dev.mikita.rolt.dao.ConsumerDao;
-import dev.mikita.rolt.entity.Consumer;
-import dev.mikita.rolt.entity.ConsumerStatus;
+import dev.mikita.rolt.dto.response.ConsumerResponseDTO;
+import dev.mikita.rolt.dto.response.PagedResponseDTO;
+import dev.mikita.rolt.exception.NotFoundException;
+import dev.mikita.rolt.exception.ValidationException;
+import dev.mikita.rolt.model.Consumer;
+import dev.mikita.rolt.model.ConsumerStatus;
+import dev.mikita.rolt.model.User;
+import dev.mikita.rolt.model.mapper.ConsumerMapper;
+import dev.mikita.rolt.repository.ConsumerRepository;
+import dev.mikita.rolt.repository.ReviewRepository;
+import dev.mikita.rolt.security.model.CustomUserDetails;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.security.Principal;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * The type Consumer service.
  */
 @Service
+@Transactional
 public class ConsumerService {
-    private final ConsumerDao consumerDao;
+    private final ConsumerRepository consumerRepository;
+    private final ReviewRepository reviewRepository;
+    private final ConsumerMapper consumerMapper;
 
-    /**
-     * Instantiates a new Consumer service.
-     *
-     * @param consumerDao the consumer dao
-     */
     @Autowired
-    public ConsumerService(ConsumerDao consumerDao) {
-        this.consumerDao = consumerDao;
+    public ConsumerService(ConsumerRepository consumerRepository,
+                           ConsumerMapper consumerMapper,
+                           ReviewRepository reviewRepository) {
+        this.consumerRepository = consumerRepository;
+        this.reviewRepository = reviewRepository;
+        this.consumerMapper = consumerMapper;
     }
 
     /**
@@ -32,85 +45,50 @@ public class ConsumerService {
      * @return the list
      */
     @Transactional(readOnly = true)
-    public List<Consumer> findAll() {
-        return consumerDao.findAll();
+    public PagedResponseDTO<ConsumerResponseDTO> getAll(Pageable pageable) {
+        Page<Consumer> result = consumerRepository.findAll(pageable);
+        List<ConsumerResponseDTO> consumers = result.getContent().stream()
+                .map(consumerMapper::toConsumerResponseDTO)
+                .toList();
+
+        return new PagedResponseDTO<>(
+                consumers,
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                result.getTotalElements(),
+                result.getTotalPages()
+        );
     }
 
-    /**
-     * Find consumer.
-     *
-     * @param id the id
-     * @return the consumer
-     */
     @Transactional(readOnly = true)
-    public Consumer find(Integer id) {
-        return consumerDao.find(id);
+    public ConsumerResponseDTO get(Long id) {
+        return consumerMapper.toConsumerResponseDTO(consumerRepository.findById(id)
+                .orElseThrow(() -> NotFoundException.create(Consumer.class.getSimpleName(), id)));
     }
 
-    /**
-     * Gets rating.
-     *
-     * @param consumer the consumer
-     * @return the rating
-     */
     @Transactional(readOnly = true)
-    public Double getRating(Consumer consumer) {
-        return consumerDao.getRating(consumer);
+    public Double getRating(Long id) {
+        Consumer user = consumerRepository.findById(id)
+                .orElseThrow(() -> NotFoundException.create(Consumer.class.getSimpleName(), id));
+
+        return reviewRepository.findAverageRatingByConsumer(user);
     }
 
-    /**
-     * Persist.
-     *
-     * @param city the city
-     */
-    @Transactional
-    public void persist(Consumer city) {
-        consumerDao.persist(city);
+    public void updateStatus(Long id, ConsumerStatus status) {
+        Consumer user = consumerRepository.findById(id)
+                .orElseThrow(() -> NotFoundException.create(Consumer.class.getSimpleName(), id));
+
+        user.setStatus(status);
     }
 
-    /**
-     * Update.
-     *
-     * @param city the city
-     */
-    @Transactional
-    public void update(Consumer city) {
-        consumerDao.update(city);
-    }
+    public void removeByConsumer(Long id, Principal principal) {
+        CustomUserDetails userDetails = (CustomUserDetails) ((Authentication) principal).getPrincipal();
+        Consumer user = (Consumer) userDetails.getUser();
 
-    /**
-     * Remove.
-     *
-     * @param user the user
-     */
-    @Transactional
-    public void remove(Consumer user) {
-        Objects.requireNonNull(user);
+        if (!user.getId().equals(id)) {
+            throw new ValidationException("You can't delete another user");
+        }
+
         user.setStatus(ConsumerStatus.DELETED);
-        consumerDao.update(user);
-    }
-
-    /**
-     * Block.
-     *
-     * @param user the user
-     */
-    @Transactional
-    public void block(Consumer user) {
-        Objects.requireNonNull(user);
-        user.setStatus(ConsumerStatus.BANNED);
-        consumerDao.update(user);
-    }
-
-    /**
-     * Active.
-     *
-     * @param user the user
-     */
-    @Transactional
-    public void active(Consumer user) {
-        Objects.requireNonNull(user);
-        user.setStatus(ConsumerStatus.ACTIVE);
-        consumerDao.update(user);
     }
 }

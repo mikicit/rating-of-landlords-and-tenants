@@ -1,6 +1,8 @@
 package dev.mikita.rolt.entity;
 
 import dev.mikita.rolt.environment.Generator;
+import dev.mikita.rolt.model.Property;
+import dev.mikita.rolt.model.Tenant;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;

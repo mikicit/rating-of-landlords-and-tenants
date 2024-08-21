@@ -1,7 +1,10 @@
 package dev.mikita.rolt.service;
 
-import dev.mikita.rolt.entity.*;
 import dev.mikita.rolt.environment.Generator;
+import dev.mikita.rolt.model.City;
+import dev.mikita.rolt.model.Landlord;
+import dev.mikita.rolt.model.Property;
+import dev.mikita.rolt.model.PublicationStatus;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

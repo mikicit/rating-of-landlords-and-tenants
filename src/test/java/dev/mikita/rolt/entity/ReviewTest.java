@@ -1,6 +1,7 @@
 package dev.mikita.rolt.entity;
 
 import dev.mikita.rolt.environment.Generator;
+import dev.mikita.rolt.model.Review;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;

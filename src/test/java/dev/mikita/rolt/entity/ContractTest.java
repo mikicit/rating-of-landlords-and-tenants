@@ -1,16 +1,15 @@
 package dev.mikita.rolt.entity;
 
 import dev.mikita.rolt.environment.Generator;
+import dev.mikita.rolt.model.*;
 import org.junit.jupiter.api.Test;
-
 import java.time.LocalDate;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class ContractTest {
+class ContractTest {
     @Test
-    public void setDateWorksProperly() {
+    void setDateWorksProperly() {
         final Contract contract = Generator.generateContract();
         contract.setStartDate(LocalDate.of(2030, 11, 15));
         contract.setEndDate(LocalDate.of(2030, 11, 20));
@@ -20,7 +19,7 @@ public class ContractTest {
     }
 
     @Test
-    public void addPropertyWorksProperly() {
+    void addPropertyWorksProperly() {
         final City city = Generator.generateCity();
         final Landlord landlord = Generator.generateLandlord();
         final Property property = Generator.generateProperty();
@@ -34,7 +33,7 @@ public class ContractTest {
     }
 
     @Test
-    public void setTenantWorksProperly() {
+    void setTenantWorksProperly() {
         final City city = Generator.generateCity();
         final Landlord landlord = Generator.generateLandlord();
         final Tenant tenant = Generator.generateTenant();
@@ -50,7 +49,7 @@ public class ContractTest {
     }
 
     @Test
-    public void prePersistContractWithIncorrectDateRangeReturnRuntimeException() {
+    void prePersistContractWithIncorrectDateRangeReturnRuntimeException() {
         final Tenant tenant = Generator.generateTenant();
         final Landlord landlord = Generator.generateLandlord();
         final City city = Generator.generateCity();
@@ -64,8 +63,6 @@ public class ContractTest {
         contract.setTenant(tenant);
         contract.setProperty(property);
 
-        assertThrows(RuntimeException.class, () -> {
-            contract.prePersist();
-        });
+        assertThrows(RuntimeException.class, contract::prePersist);
     }
 }

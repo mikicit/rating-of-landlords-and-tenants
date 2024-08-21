@@ -1,40 +1,43 @@
 package dev.mikita.rolt.service;
 
-import dev.mikita.rolt.dao.ModeratorDao;
-import dev.mikita.rolt.dao.UserDao;
-import dev.mikita.rolt.entity.Moderator;
-import dev.mikita.rolt.entity.Role;
+import dev.mikita.rolt.dto.request.ModeratorCreateRequestDTO;
+import dev.mikita.rolt.dto.request.ModeratorUpdateRequestDTO;
+import dev.mikita.rolt.dto.response.ModeratorResponseDTO;
+import dev.mikita.rolt.dto.response.PagedResponseDTO;
+import dev.mikita.rolt.exception.NotFoundException;
+import dev.mikita.rolt.model.Moderator;
 import dev.mikita.rolt.exception.ValidationException;
+import dev.mikita.rolt.model.mapper.ModeratorMapper;
+import dev.mikita.rolt.repository.ModeratorRepository;
+import dev.mikita.rolt.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * The type Moderator service.
  */
 @Service
+@Transactional
 public class ModeratorService {
-    private final ModeratorDao moderatorDao;
-    private final UserDao userDao;
+    private final ModeratorRepository moderatorRepository;
+    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final ModeratorMapper moderatorMapper;
 
-    /**
-     * Instantiates a new Moderator service.
-     *
-     * @param moderatorDao    the moderator dao
-     * @param passwordEncoder the password encoder
-     * @param userDao         the user dao
-     */
     @Autowired
-    public ModeratorService(ModeratorDao moderatorDao,
+    public ModeratorService(ModeratorRepository moderatorRepository,
+                            UserRepository userRepository,
                             PasswordEncoder passwordEncoder,
-                            UserDao userDao) {
-        this.moderatorDao = moderatorDao;
-        this.userDao = userDao;
+                            ModeratorMapper moderatorMapper) {
+        this.moderatorRepository = moderatorRepository;
+        this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.moderatorMapper = moderatorMapper;
     }
 
     /**
@@ -43,8 +46,18 @@ public class ModeratorService {
      * @return the list
      */
     @Transactional(readOnly = true)
-    public List<Moderator> findAll() {
-        return moderatorDao.findAll();
+    public PagedResponseDTO<ModeratorResponseDTO> getAll(Pageable pageable) {
+        Page<Moderator> page = moderatorRepository.findAll(pageable);
+        List<ModeratorResponseDTO> content = page.getContent().stream()
+                .map(moderatorMapper::toModeratorResponseDTO)
+                .toList();
+
+        return new PagedResponseDTO<>(
+                content,
+                page.getNumber(),
+                page.getSize(),
+                page.getTotalElements(),
+                page.getTotalPages());
     }
 
     /**
@@ -54,44 +67,34 @@ public class ModeratorService {
      * @return the moderator
      */
     @Transactional(readOnly = true)
-    public Moderator find(Integer id) {
-        return moderatorDao.find(id);
+    public ModeratorResponseDTO get(Long id) {
+        return moderatorMapper.toModeratorResponseDTO(moderatorRepository.findById(id)
+                .orElseThrow(() -> NotFoundException.create(Moderator.class.getSimpleName(), id)));
     }
 
-    /**
-     * Persist.
-     *
-     * @param user the user
-     */
-    @Transactional
-    public void persist(Moderator user) {
-        Objects.requireNonNull(user);
-        if (userDao.findByEmail(user.getEmail()) != null) {
-            throw new ValidationException("A user with this email already exists.");
+    public ModeratorResponseDTO add(ModeratorCreateRequestDTO dto) {
+        if (userRepository.findByEmail(dto.email()).isPresent()) {
+            throw new ValidationException("User with email " + dto.email() + " already exists");
         }
 
-        user.setRole(Role.MODERATOR);
-        user.encodePassword(passwordEncoder);
-        moderatorDao.persist(user);
+        Moderator moderator = moderatorMapper.toModerator(dto);
+        moderator.encodePassword(passwordEncoder);
+
+        return moderatorMapper.toModeratorResponseDTO(moderatorRepository.save(moderator));
     }
 
-    /**
-     * Update.
-     *
-     * @param user the user
-     */
-    @Transactional
-    public void update(Moderator user) {
-        moderatorDao.update(user);
+    public ModeratorResponseDTO update(Long id, ModeratorUpdateRequestDTO dto) {
+        Moderator moderator = moderatorRepository.findById(id)
+                .orElseThrow(() -> NotFoundException.create(Moderator.class.getSimpleName(), id));
+
+        moderatorMapper.updateModeratorFromDTO(dto, moderator);
+        return moderatorMapper.toModeratorResponseDTO(moderatorRepository.save(moderator));
     }
 
-    /**
-     * Remove.
-     *
-     * @param user the user
-     */
-    @Transactional
-    public void remove(Moderator user) {
-        moderatorDao.remove(user);
+    public void remove(Long id) {
+        Moderator moderator = moderatorRepository.findById(id)
+                .orElseThrow(() -> NotFoundException.create(Moderator.class.getSimpleName(), id));
+
+        moderatorRepository.delete(moderator);
     }
 }

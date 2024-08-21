@@ -1,15 +1,27 @@
 package dev.mikita.rolt.service;
 
-import dev.mikita.rolt.dao.LandlordDao;
-import dev.mikita.rolt.dao.UserDao;
-import dev.mikita.rolt.entity.*;
+import dev.mikita.rolt.dto.request.LandlordCreateRequestDTO;
+import dev.mikita.rolt.dto.request.LandlordUpdateRequestDTO;
+import dev.mikita.rolt.dto.response.LandlordResponseDTO;
+import dev.mikita.rolt.dto.response.PagedResponseDTO;
+import dev.mikita.rolt.exception.NotFoundException;
 import dev.mikita.rolt.exception.ValidationException;
+import dev.mikita.rolt.model.*;
+import dev.mikita.rolt.model.mapper.LandlordMapper;
+import dev.mikita.rolt.repository.LandlordRepository;
+import dev.mikita.rolt.repository.UserRepository;
+import dev.mikita.rolt.repository.specification.LandlordSpecs;
+import dev.mikita.rolt.security.model.CustomUserDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.security.Principal;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -17,112 +29,89 @@ import java.util.Objects;
  * The type Landlord service.
  */
 @Service
+@Transactional
 public class LandlordService {
-    private final LandlordDao landlordDao;
-    private final UserDao userDao;
+    private final LandlordRepository landlordRepository;
+    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final LandlordMapper landlordMapper;
 
-    /**
-     * Instantiates a new Landlord service.
-     *
-     * @param landlordDao     the landlord dao
-     * @param passwordEncoder the password encoder
-     * @param userDao         the user dao
-     */
     @Autowired
-    public LandlordService(
-            LandlordDao landlordDao,
-            PasswordEncoder passwordEncoder,
-            UserDao userDao) {
-        this.landlordDao = landlordDao;
+    public LandlordService(LandlordRepository landlordRepository,
+                           UserRepository userRepository,
+                           PasswordEncoder passwordEncoder, LandlordMapper landlordMapper) {
+        this.landlordRepository = landlordRepository;
+        this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.userDao = userDao;
+        this.landlordMapper = landlordMapper;
     }
 
-    /**
-     * Find all page.
-     *
-     * @param pageable the pageable
-     * @param filters  the filters
-     * @return the page
-     */
     @Transactional(readOnly = true)
-    public Page<Landlord> findAll(Pageable pageable, Map<String, Object> filters) {
-        return landlordDao.findAll(pageable, filters);
-    }
+    public PagedResponseDTO<LandlordResponseDTO> getAll(Pageable pageable, Map<String, Object> filters) {
+        Specification<Landlord> spec = Specification.where(null);
 
-    /**
-     * Find landlord.
-     *
-     * @param id the id
-     * @return the landlord
-     */
-    @Transactional(readOnly = true)
-    public Landlord find(Integer id) {
-        return landlordDao.find(id);
-    }
-
-    /**
-     * Persist.
-     *
-     * @param user the user
-     */
-    @Transactional
-    public void persist(Landlord user) {
-        Objects.requireNonNull(user);
-        if (userDao.findByEmail(user.getEmail()) != null) {
-            throw new ValidationException("A user with this email already exists.");
+        if (filters.containsKey("status")) {
+            ConsumerStatus status = ConsumerStatus.valueOf((String) filters.get("status"));
+            spec = spec.and(LandlordSpecs.withStatus(status));
         }
 
-        user.setRole(Role.LANDLORD);
-        user.encodePassword(passwordEncoder);
-        landlordDao.persist(user);
+        if (filters.containsKey("gender")) {
+            ConsumerGender gender = ConsumerGender.valueOf((String) filters.get("gender"));
+            spec = spec.and(LandlordSpecs.withGender(gender));
+        }
+
+        Page<Landlord> page = landlordRepository.findAll(spec, pageable);
+        List<LandlordResponseDTO> content = page.getContent().stream()
+                .map(landlordMapper::toLandlordResponseDTO)
+                .toList();
+
+        return new PagedResponseDTO<>(
+                content,
+                page.getNumber(),
+                page.getSize(),
+                page.getTotalElements(),
+                page.getTotalPages());
     }
 
-    /**
-     * Update.
-     *
-     * @param user the user
-     */
-    @Transactional
-    public void update(Landlord user) {
-        landlordDao.update(user);
+    @Transactional(readOnly = true)
+    public LandlordResponseDTO get(Long id) {
+        Landlord landlord = landlordRepository.findById(id)
+                .orElseThrow(() -> NotFoundException.create(Landlord.class.getSimpleName(), id));
+
+        if (landlord.getStatus() != ConsumerStatus.ACTIVE) {
+            throw NotFoundException.create(Landlord.class.getSimpleName(), id);
+        }
+
+        return landlordMapper.toLandlordResponseDTO(landlord);
     }
 
-    /**
-     * Remove.
-     *
-     * @param user the user
-     */
-    @Transactional
-    public void remove(Landlord user) {
-        Objects.requireNonNull(user);
-        user.setStatus(ConsumerStatus.DELETED);
-        landlordDao.update(user);
+    public void add(LandlordCreateRequestDTO dto) {
+        if (userRepository.findByEmail(dto.email()).isPresent()) {
+            throw new ValidationException("User with email " + dto.email() + " already exists");
+        }
+
+        Landlord landlord = landlordMapper.toLandlord(dto);
+        landlord.encodePassword(passwordEncoder);
+
+        landlordRepository.save(landlord);
     }
 
-    /**
-     * Block.
-     *
-     * @param user the user
-     */
-    @Transactional
-    public void block(Landlord user) {
-        Objects.requireNonNull(user);
-        user.setStatus(ConsumerStatus.BANNED);
-        user.getProperties().forEach(p -> p.setStatus(PublicationStatus.DELETED));
-        landlordDao.update(user);
-    }
+    public LandlordResponseDTO update(Long id, LandlordUpdateRequestDTO dto, Principal principal) {
+        CustomUserDetails userDetails = (CustomUserDetails) ((Authentication) principal).getPrincipal();
+        User user = userDetails.getUser();
 
-    /**
-     * Active.
-     *
-     * @param user the user
-     */
-    @Transactional
-    public void active(Landlord user) {
-        Objects.requireNonNull(user);
-        user.setStatus(ConsumerStatus.ACTIVE);
-        landlordDao.update(user);
+        if (!Objects.equals(id, user.getId())) {
+            throw new ValidationException("You can only update your own profile.");
+        }
+
+        Landlord landlord = landlordRepository.findById(id)
+                .orElseThrow(() -> NotFoundException.create(Landlord.class.getSimpleName(), id));
+
+        if (landlord.getStatus() != ConsumerStatus.ACTIVE) {
+            throw NotFoundException.create(Landlord.class.getSimpleName(), id);
+        }
+
+        landlordMapper.updateLandlordFromDTO(dto, landlord);
+        return landlordMapper.toLandlordResponseDTO(landlordRepository.save(landlord));
     }
 }

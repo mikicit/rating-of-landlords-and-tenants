@@ -2,8 +2,7 @@ package dev.mikita.rolt.security;
 
 import dev.mikita.rolt.security.model.AuthenticationToken;
 import dev.mikita.rolt.security.model.CustomUserDetails;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -17,10 +16,9 @@ import org.springframework.stereotype.Service;
 /**
  * The type Default authentication provider.
  */
+@Slf4j
 @Service
 public class DefaultAuthenticationProvider implements AuthenticationProvider {
-    private static final Logger LOG = LoggerFactory.getLogger(DefaultAuthenticationProvider.class);
-
     private final UserDetailsService userDetailsService;
     private final PasswordEncoder passwordEncoder;
 
@@ -46,9 +44,7 @@ public class DefaultAuthenticationProvider implements AuthenticationProvider {
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         final String username = authentication.getPrincipal().toString();
 
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Authenticating user {}", username);
-        }
+        log.debug("Authenticating user: {}", username);
 
         final CustomUserDetails userDetails = (CustomUserDetails) userDetailsService.loadUserByUsername(username);
         final String password = (String) authentication.getCredentials();

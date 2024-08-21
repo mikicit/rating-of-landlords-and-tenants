@@ -1,7 +1,7 @@
 package dev.mikita.rolt.environment;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.mikita.rolt.config.AppConfig;
-import dev.mikita.rolt.entity.User;
+import dev.mikita.rolt.model.User;
 import dev.mikita.rolt.security.model.AuthenticationToken;
 import dev.mikita.rolt.security.model.CustomUserDetails;
 import org.springframework.http.converter.HttpMessageConverter;

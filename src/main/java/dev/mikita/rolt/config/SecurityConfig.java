@@ -19,7 +19,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 @Configuration
 @EnableConfigurationProperties
 @EnableWebSecurity()
-@EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)// Allow methods to be secured using annotation
+@EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final AuthenticationProvider authenticationProvider;
 

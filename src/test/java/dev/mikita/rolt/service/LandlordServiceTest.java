@@ -1,9 +1,9 @@
 package dev.mikita.rolt.service;
 
-import dev.mikita.rolt.entity.City;
-import dev.mikita.rolt.entity.ConsumerStatus;
-import dev.mikita.rolt.entity.Landlord;
-import dev.mikita.rolt.entity.Property;
+import dev.mikita.rolt.model.City;
+import dev.mikita.rolt.model.ConsumerStatus;
+import dev.mikita.rolt.model.Landlord;
+import dev.mikita.rolt.model.Property;
 import dev.mikita.rolt.environment.Generator;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

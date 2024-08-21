@@ -1,7 +1,6 @@
 package dev.mikita.rolt.service.security;
 
-import dev.mikita.rolt.dao.UserDao;
-import dev.mikita.rolt.entity.User;
+import dev.mikita.rolt.model.User;
 import dev.mikita.rolt.security.model.CustomUserDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
